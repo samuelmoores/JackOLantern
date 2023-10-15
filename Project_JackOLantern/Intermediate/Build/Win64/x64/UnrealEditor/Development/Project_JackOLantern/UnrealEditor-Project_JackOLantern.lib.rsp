@@ -1,0 +1,17 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UnrealEditor-Project_JackOLantern.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"C:\UnrealProjects\JackOLantern\Project_JackOLantern\Intermediate\Build\Win64\x64\Project_JackOLanternEditor\Development\Engine\SharedPCH.Engine.Cpp20.h.obj"
+"C:\UnrealProjects\JackOLantern\Project_JackOLantern\Intermediate\Build\Win64\x64\UnrealEditor\Development\Project_JackOLantern\Project_JackOLantern.init.gen.cpp.obj"
+"C:\UnrealProjects\JackOLantern\Project_JackOLantern\Intermediate\Build\Win64\x64\UnrealEditor\Development\Project_JackOLantern\Project_JackOLanternCharacter.gen.cpp.obj"
+"C:\UnrealProjects\JackOLantern\Project_JackOLantern\Intermediate\Build\Win64\x64\UnrealEditor\Development\Project_JackOLantern\Project_JackOLanternGameMode.gen.cpp.obj"
+"C:\UnrealProjects\JackOLantern\Project_JackOLantern\Intermediate\Build\Win64\x64\UnrealEditor\Development\Project_JackOLantern\Project_JackOLantern.cpp.obj"
+"C:\UnrealProjects\JackOLantern\Project_JackOLantern\Intermediate\Build\Win64\x64\UnrealEditor\Development\Project_JackOLantern\Project_JackOLanternCharacter.cpp.obj"
+"C:\UnrealProjects\JackOLantern\Project_JackOLantern\Intermediate\Build\Win64\x64\UnrealEditor\Development\Project_JackOLantern\Project_JackOLanternGameMode.cpp.obj"
+"C:\UnrealProjects\JackOLantern\Project_JackOLantern\Intermediate\Build\Win64\x64\UnrealEditor\Development\Project_JackOLantern\Default.rc2.res"
+/OUT:"C:\UnrealProjects\JackOLantern\Project_JackOLantern\Intermediate\Build\Win64\x64\UnrealEditor\Development\Project_JackOLantern\UnrealEditor-Project_JackOLantern.lib"

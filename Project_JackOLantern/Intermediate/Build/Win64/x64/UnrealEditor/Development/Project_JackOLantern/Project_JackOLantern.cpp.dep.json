@@ -1,0 +1,14 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "c:\\unrealprojects\\jackolantern\\project_jackolantern\\source\\project_jackolantern\\project_jackolantern.cpp",
+        "ProvidedModule": "",
+        "PCH": "c:\\unrealprojects\\jackolantern\\project_jackolantern\\intermediate\\build\\win64\\x64\\project_jackolanterneditor\\development\\engine\\sharedpch.engine.cpp20.h.pch",
+        "Includes": [
+            "c:\\unrealprojects\\jackolantern\\project_jackolantern\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\project_jackolantern\\definitions.project_jackolantern.h",
+            "c:\\unrealprojects\\jackolantern\\project_jackolantern\\source\\project_jackolantern\\project_jackolantern.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}

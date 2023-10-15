@@ -1,0 +1,26 @@
+{
+	"version": 1,
+	"changelists": [
+		{
+			"guid": "00000000000000000000000000000000",
+			"description": "Default Uncontrolled Changelist",
+			"files": [
+				"C:/UnrealProjects/Project_JackOLantern_Repo/Project_JackOLantern/Content/Level.umap",
+				"C:/UnrealProjects/Project_JackOLantern/Content/StarterContent/HDRI/HDRI_Epic_Courtyard_Daylight.uasset",
+				"C:/UnrealProjects/Project_JackOLantern/Content/Meshes/SM_Ground.uasset",
+				"C:/UnrealProjects/Project_JackOLantern/Content/Level.umap",
+				"C:/UnrealProjects/Project_JackOLantern/Content/Meshes/M_RoadCenterLines.uasset",
+				"C:/UnrealProjects/Project_JackOLantern/Content/Meshes/M_RoadSideLines.uasset",
+				"C:/UnrealProjects/Project_JackOLantern/Content/Meshes/standardSurface1.uasset",
+				"C:/UnrealProjects/Project_JackOLantern/Content/Materials/M_Grass.uasset",
+				"C:/UnrealProjects/Project_JackOLantern/Content/Materials/M_Road.uasset",
+				"C:/UnrealProjects/Project_JackOLantern/Content/Level_BuiltData.uasset",
+				"C:/UnrealProjects/Project_JackOLantern/Content/Materials/Textures/asphalt_road.uasset",
+				"C:/UnrealProjects/Project_JackOLantern/Content/Materials/Textures/asphalt_road_2.uasset",
+				"C:/UnrealProjects/Project_JackOLantern/Content/Materials/Textures/grass3.uasset",
+				"C:/UnrealProjects/Project_JackOLantern/Content/Materials/M_Sidewalk.uasset",
+				"C:/UnrealProjects/Project_JackOLantern/Content/Meshes/SM_StreetLight.uasset"
+			]
+		}
+	]
+}
