@@ -1,6 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Project_JackOLanternCharacter.h"
+
+#include "Door.h"
 #include "Engine/LocalPlayer.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -10,6 +12,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "JackOLantern.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -52,12 +55,80 @@ AProject_JackOLanternCharacter::AProject_JackOLanternCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+
+	Door = nullptr;
+}
+
+void AProject_JackOLanternCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
+{
+	Super::NotifyActorBeginOverlap(OtherActor);
+	if(OtherActor->IsA(ADoor::StaticClass()))
+	{
+		Door = Cast<ADoor>(OtherActor);
+	}
+}
+
+void AProject_JackOLanternCharacter::NotifyActorEndOverlap(AActor* OtherActor)
+{
+	Super::NotifyActorEndOverlap(OtherActor);
+	if(Door)
+	{
+		Door = nullptr;
+	}
+}
+
+float AProject_JackOLanternCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
+                                                 AController* EventInstigator, AActor* DamageCauser)
+{
+	health -= DamageAmount;
+
+	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+}
+
+void AProject_JackOLanternCharacter::Throw()
+{
+	FActorSpawnParameters spawnParams;
+	GetWorld()->SpawnActor<AActor>(ActorToSpawn,  GetActorLocation() + GetActorForwardVector()*200, GetActorRotation(), spawnParams);
+
+	AJackOLantern* jack = Cast<AJackOLantern>(ActorToSpawn);
+
+	if(jack)
+	{
+		
+	}
+	
+}
+
+void AProject_JackOLanternCharacter::AddCandy()
+{
+	numCandy++;
+}
+
+int AProject_JackOLanternCharacter::GetCandy()
+{
+	return numCandy;
+}
+
+void AProject_JackOLanternCharacter::startInteracting()
+{
+	if(Door)
+	{
+		Door->Open();
+	}
+}
+
+void AProject_JackOLanternCharacter::stopInteracting()
+{
+	interacting = false;
 }
 
 void AProject_JackOLanternCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+
+	health = 1.0f;
+	numCandy = 0;
 
 	//Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
@@ -86,6 +157,17 @@ void AProject_JackOLanternCharacter::SetupPlayerInputComponent(UInputComponent* 
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AProject_JackOLanternCharacter::Look);
+
+		//Throwing
+		EnhancedInputComponent->BindAction(ThrowAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::Throw);
+
+		//Interacting
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::startInteracting);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &AProject_JackOLanternCharacter::stopInteracting);
+
+		//Another New Event
+
+		
 	}
 	else
 	{
@@ -128,3 +210,6 @@ void AProject_JackOLanternCharacter::Look(const FInputActionValue& Value)
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
 }
+
+
+

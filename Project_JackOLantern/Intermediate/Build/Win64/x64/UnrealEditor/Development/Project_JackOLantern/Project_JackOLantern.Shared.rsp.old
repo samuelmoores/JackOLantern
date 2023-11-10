@@ -1,6 +1,6 @@
 /I "."
-/I "C:\UnrealProjects\Project_JackOLantern_Repo\Project_JackOLantern\Intermediate\Build\Win64\UnrealEditor\Inc\Project_JackOLantern\UHT"
-/I "C:\UnrealProjects\Project_JackOLantern_Repo\Project_JackOLantern\Source"
+/I "C:\UnrealProjects\JackOLantern\Project_JackOLantern\Intermediate\Build\Win64\UnrealEditor\Inc\Project_JackOLantern\UHT"
+/I "C:\UnrealProjects\JackOLantern\Project_JackOLantern\Source"
 /I "Runtime\Core\Public"
 /I "Runtime\Core\Internal"
 /I "Runtime\TraceLog\Public"

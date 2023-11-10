@@ -44,9 +44,49 @@ class AProject_JackOLanternCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
 
+	/** Look Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ThrowAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* InteractAction;
+
+	//-----------Health-----------
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	float health;
+
+	//----------Pickups-------------
+	UPROPERTY(EditAnywhere, BlueprintReadonly, meta = (AllowPrivateAccess = "true"))
+	int numCandy;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<AActor> ActorToSpawn;
+
+	//has enemy found the player
+	bool isDetected;
+
+	//Is player interacting
+	bool interacting;
+
+	//Reference to open door
+	class ADoor* Door;
+	
 public:
 	AProject_JackOLanternCharacter();
-	
+
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
+
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+	void AddCandy();
+
+	UFUNCTION(BlueprintCallable)
+	int GetCandy();
+
+	void startInteracting();
+	void stopInteracting();
+	FORCEINLINE bool isInteracting() const { return interacting; };
 
 protected:
 
@@ -55,7 +95,9 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
-			
+
+	/** Called for throwing input */
+	void Throw();
 
 protected:
 	// APawn interface

@@ -33,6 +33,36 @@
     <Filter Include="Source\Project_JackOLantern">
       <UniqueIdentifier>{0AA00A84-A035-3E2D-A602-70C5CB0022DF}</UniqueIdentifier>
     </Filter>
+    <ClCompile Include="..\..\Source\Project_JackOLantern\Door.cpp">
+      <Filter>Source\Project_JackOLantern</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\Project_JackOLantern\Door.h">
+      <Filter>Source\Project_JackOLantern</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\Project_JackOLantern\Enemy.cpp">
+      <Filter>Source\Project_JackOLantern</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\Project_JackOLantern\Enemy.h">
+      <Filter>Source\Project_JackOLantern</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\Project_JackOLantern\JackOLantern.cpp">
+      <Filter>Source\Project_JackOLantern</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\Project_JackOLantern\JackOLantern.h">
+      <Filter>Source\Project_JackOLantern</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\Project_JackOLantern\Pickup.cpp">
+      <Filter>Source\Project_JackOLantern</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\Project_JackOLantern\Pickup.h">
+      <Filter>Source\Project_JackOLantern</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\Project_JackOLantern\Pot.cpp">
+      <Filter>Source\Project_JackOLantern</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\Project_JackOLantern\Pot.h">
+      <Filter>Source\Project_JackOLantern</Filter>
+    </ClInclude>
     <None Include="..\..\Source\Project_JackOLantern\Project_JackOLantern.Build.cs">
       <Filter>Source\Project_JackOLantern</Filter>
     </None>
