@@ -1,8 +1,0 @@
-{
-	"SourceFiles": [
-		"C:\\UnrealProjects\\JackOLantern\\Project_JackOLantern\\Source\\Project_JackOLantern\\Project_JackOLantern.Build.cs",
-		"C:\\UnrealProjects\\JackOLantern\\Project_JackOLantern\\Source\\Project_JackOLantern.Target.cs",
-		"C:\\UnrealProjects\\JackOLantern\\Project_JackOLantern\\Source\\Project_JackOLanternEditor.Target.cs"
-	],
-	"EngineVersion": "5.3.1"
-}
