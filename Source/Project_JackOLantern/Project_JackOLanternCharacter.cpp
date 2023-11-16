@@ -13,6 +13,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "JackOLantern.h"
+#include "Ball.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -88,13 +89,44 @@ float AProject_JackOLanternCharacter::TakeDamage(float DamageAmount, FDamageEven
 void AProject_JackOLanternCharacter::Throw()
 {
 	FActorSpawnParameters spawnParams;
-	GetWorld()->SpawnActor<AActor>(ActorToSpawn,  GetActorLocation() + GetActorForwardVector()*200, GetActorRotation(), spawnParams);
+	spawnParams.Owner = this;
+	spawnParams.Instigator = GetInstigator();
+	
 
 	AJackOLantern* jack = Cast<AJackOLantern>(ActorToSpawn);
+	FVector Start = GetActorLocation();
+	FVector End = Start;
+	FCollisionQueryParams Params;
+	FCollisionObjectQueryParams ObjectParams;
+	ObjectParams.AddObjectTypesToQuery(ECollisionChannel::ECC_GameTraceChannel1);
+	Params.AddIgnoredActor(this);
+    FHitResult Hit;
+	bool bhit = GetWorld()->SweepSingleByChannel(Hit,Start,End,FQuat::Identity, ECC_Visibility,FCollisionShape::MakeSphere(200.0f),Params);
+	DrawDebugSphere(GetWorld(), Start, 200.0f, 32, FColor::Green, false, 1.0, 0, 1.0);
+	AActor* HitActor = Hit.GetActor();
+	if(bhit)
+	{
+		if(HitActor != nullptr && HitActor->IsA(ABall::StaticClass()))
+		{
+			
+			AActor* Spawned = GetWorld()->SpawnActor<AActor>(HitActor->GetClass(), GetActorLocation() + GetActorForwardVector()*200, GetActorRotation(), spawnParams);
+			HitActor->Destroy();
+			UPrimitiveComponent* spawnedPrimitive = Cast<UPrimitiveComponent>(Spawned->GetRootComponent());
+			if (Spawned)
+			{
+				if (spawnedPrimitive)
+				{
 
+					FVector ThrowDirection = GetActorForwardVector();
+					float ThrowStrength = 90000.0f;
+					spawnedPrimitive->AddImpulse(ThrowDirection * ThrowStrength);
+				}
+			}
+		}
+	}
 	if(jack)
 	{
-		
+		GetWorld()->SpawnActor<AActor>(ActorToSpawn,  GetActorLocation() + GetActorForwardVector()*200, GetActorRotation(), spawnParams);	
 	}
 	
 }
