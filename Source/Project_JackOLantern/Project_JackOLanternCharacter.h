@@ -3,10 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "JackOLantern.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "Project_JackOLanternCharacter.generated.h"
 
+class AThrowable;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
@@ -60,7 +62,7 @@ class AProject_JackOLanternCharacter : public ACharacter
 	int numCandy;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<AActor> ActorToSpawn;
+	TSubclassOf<AThrowable> throwable;
 
 	//has enemy found the player
 	bool isDetected;
@@ -70,8 +72,7 @@ class AProject_JackOLanternCharacter : public ACharacter
 
 	//Reference to open door
 	class ADoor* Door;
-
-	class AThrowable* Throwable;
+	
 	
 public:
 	AProject_JackOLanternCharacter();

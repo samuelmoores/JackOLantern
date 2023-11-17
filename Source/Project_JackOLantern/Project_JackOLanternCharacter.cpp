@@ -12,7 +12,6 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
-#include "JackOLantern.h"
 #include "Throwable.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -92,9 +91,7 @@ void AProject_JackOLanternCharacter::Throw()
 	spawnParams.Owner = this;
 	spawnParams.Instigator = GetInstigator();
 	
-
-	AJackOLantern* jack = Cast<AJackOLantern>(ActorToSpawn);
-	FVector Start = GetActorLocation();
+	FVector Start = GetActorLocation() + GetActorForwardVector()* 100.0f;
 	FVector End = Start;
 	FCollisionQueryParams Params;
 	FCollisionObjectQueryParams ObjectParams;
@@ -102,8 +99,19 @@ void AProject_JackOLanternCharacter::Throw()
 	Params.AddIgnoredActor(this);
     FHitResult Hit;
 	bool bhit = GetWorld()->SweepSingleByChannel(Hit,Start,End,FQuat::Identity, ECC_Visibility,FCollisionShape::MakeSphere(200.0f),Params);
-	DrawDebugSphere(GetWorld(), Start, 200.0f, 32, FColor::Green, false, 1.0, 0, 1.0);
 	AActor* HitActor = Hit.GetActor();
+
+	if(throwable)
+	{
+		DrawDebugSphere(GetWorld(), Start, 200.0f, 32, FColor::Green, false, 1.0, 0, 1.0);
+
+		FVector Location(0.0f, 0.0f, 0.0f);
+		FRotator Rotation(0.0f, 0.0f, 0.0f);
+		FActorSpawnParameters SpawnInfo;
+		GetWorld()->SpawnActor<AThrowable>(throwable, GetActorLocation() + GetActorForwardVector() * 200.0f, GetActorRotation(), SpawnInfo);
+	
+	}
+
 	if(bhit)
 	{
 		if(HitActor != nullptr && HitActor->IsA(AThrowable::StaticClass()))
@@ -129,10 +137,7 @@ void AProject_JackOLanternCharacter::Throw()
 			}
 		}
 	}
-	if(jack)
-	{
-		GetWorld()->SpawnActor<AActor>(ActorToSpawn,  GetActorLocation() + GetActorForwardVector()*200, GetActorRotation(), spawnParams);	
-	}
+	
 	
 }
 

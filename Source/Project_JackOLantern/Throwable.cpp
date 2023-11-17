@@ -12,14 +12,15 @@ AThrowable::AThrowable()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	ThrowableMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ThrowableMesh"));
-	
-
 	// Create and attach a sphere collision component
 	ThrowableCollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("BallCollisionComponent"));
 	ThrowableCollisionComponent->OnComponentHit.AddDynamic(this, &AThrowable::OnHit);
 	RootComponent = ThrowableCollisionComponent;
 	isThrown = false;
+
+	ThrowableMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ThrowableMesh"));
+	ThrowableMesh->SetupAttachment(ThrowableCollisionComponent);
+
 }
 
 void AThrowable::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
