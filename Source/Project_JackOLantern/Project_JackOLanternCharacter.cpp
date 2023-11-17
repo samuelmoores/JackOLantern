@@ -101,16 +101,16 @@ void AProject_JackOLanternCharacter::Throw()
 	bool bhit = GetWorld()->SweepSingleByChannel(Hit,Start,End,FQuat::Identity, ECC_Visibility,FCollisionShape::MakeSphere(200.0f),Params);
 	AActor* HitActor = Hit.GetActor();
 
-	if(throwable)
-	{
-		DrawDebugSphere(GetWorld(), Start, 200.0f, 32, FColor::Green, false, 1.0, 0, 1.0);
-
-		FVector Location(0.0f, 0.0f, 0.0f);
-		FRotator Rotation(0.0f, 0.0f, 0.0f);
-		FActorSpawnParameters SpawnInfo;
-		GetWorld()->SpawnActor<AThrowable>(throwable, GetActorLocation() + GetActorForwardVector() * 200.0f, GetActorRotation(), SpawnInfo);
-	
-	}
+	// if(throwable)
+	// {
+	// 	DrawDebugSphere(GetWorld(), Start, 200.0f, 32, FColor::Green, false, 1.0, 0, 1.0);
+	//
+	// 	FVector Location(0.0f, 0.0f, 0.0f);
+	// 	FRotator Rotation(0.0f, 0.0f, 0.0f);
+	// 	FActorSpawnParameters SpawnInfo;
+	// 	GetWorld()->SpawnActor<AThrowable>(throwable, GetActorLocation() + GetActorForwardVector() * 200.0f, GetActorRotation(), SpawnInfo);
+	//
+	// }
 
 	if(bhit)
 	{

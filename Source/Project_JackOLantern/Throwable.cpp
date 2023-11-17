@@ -15,14 +15,18 @@ AThrowable::AThrowable()
 	// Create and attach a sphere collision component
 	ThrowableCollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("BallCollisionComponent"));
 	ThrowableCollisionComponent->OnComponentHit.AddDynamic(this, &AThrowable::OnHit);
-	RootComponent = ThrowableCollisionComponent;
 	isThrown = false;
-
-	ThrowableMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ThrowableMesh"));
+	ThrowableMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ThrowableMesh"));;
+	RootComponent = ThrowableCollisionComponent;
 	ThrowableMesh->SetupAttachment(ThrowableCollisionComponent);
-
+	ThrowableCollisionComponent->SetCollisionProfileName(TEXT("BlockAll"));
+	ThrowableCollisionComponent->SetSimulatePhysics(true);
+	ThrowableCollisionComponent->SetNotifyRigidBodyCollision(true);
+	ThrowableMesh->SetSimulatePhysics(false);
+	ThrowableMesh->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+	
+	
 }
-
 void AThrowable::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	if(isThrown)
