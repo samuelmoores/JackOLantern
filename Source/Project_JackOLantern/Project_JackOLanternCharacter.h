@@ -71,7 +71,7 @@ class AProject_JackOLanternCharacter : public ACharacter
 	//Reference to open door
 	class ADoor* Door;
 
-	//class ABall* Ball;
+	class AThrowable* Throwable;
 	
 public:
 	AProject_JackOLanternCharacter();

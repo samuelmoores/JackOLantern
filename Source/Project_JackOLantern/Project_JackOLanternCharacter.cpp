@@ -13,7 +13,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "JackOLantern.h"
-#include "Ball.h"
+#include "Throwable.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -106,7 +106,7 @@ void AProject_JackOLanternCharacter::Throw()
 	AActor* HitActor = Hit.GetActor();
 	if(bhit)
 	{
-		if(HitActor != nullptr && HitActor->IsA(ABall::StaticClass()))
+		if(HitActor != nullptr && HitActor->IsA(AThrowable::StaticClass()))
 		{
 			
 			AActor* Spawned = GetWorld()->SpawnActor<AActor>(HitActor->GetClass(), GetActorLocation() + GetActorForwardVector()*200, GetActorRotation(), spawnParams);
@@ -114,9 +114,14 @@ void AProject_JackOLanternCharacter::Throw()
 			UPrimitiveComponent* spawnedPrimitive = Cast<UPrimitiveComponent>(Spawned->GetRootComponent());
 			if (Spawned)
 			{
+				AThrowable* ThrowableActor = Cast<AThrowable>(Spawned);
+				if(ThrowableActor)
+				{
+					ThrowableActor->isThrown = true;
+				}
 				if (spawnedPrimitive)
 				{
-
+					
 					FVector ThrowDirection = GetActorForwardVector();
 					float ThrowStrength = 90000.0f;
 					spawnedPrimitive->AddImpulse(ThrowDirection * ThrowStrength);
