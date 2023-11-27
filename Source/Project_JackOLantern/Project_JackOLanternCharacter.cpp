@@ -19,7 +19,7 @@ DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 //////////////////////////////////////////////////////////////////////////
 // AProject_JackOLanternCharacter
 
-AProject_JackOLanternCharacter::AProject_JackOLanternCharacter()
+AProject_JackOLanternCharacter::AProject_JackOLanternCharacter() 
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
