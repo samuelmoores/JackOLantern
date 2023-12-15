@@ -27,7 +27,7 @@ void ADoor::Open()
 {
 	if(!isOpen)
 	{
-		openStartTime = GetWorld()->GetTimeSeconds();
+		openStartTime = GetWorld()->GetTimeSeconds(); 
 		GetWorldTimerManager().SetTimer(Timer,this, &ADoor::Rotate, GetWorld()->GetDeltaSeconds()/rotateSpeed, true);
 	}
 }
