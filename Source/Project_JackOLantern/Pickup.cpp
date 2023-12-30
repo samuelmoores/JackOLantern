@@ -48,7 +48,6 @@ void APickup::NotifyActorBeginOverlap(AActor* OtherActor)
 	{
 		ParticleSystem->Activate();
 		Mesh->SetVisibility(false);
-		Cast<AProject_JackOLanternCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))->AddCandy();
 	}
 	
 }

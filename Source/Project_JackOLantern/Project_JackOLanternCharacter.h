@@ -3,17 +3,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "JackOLantern.h"
+#include "InputActionValue.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "Project_JackOLanternCharacter.generated.h"
 
-class AThrowable;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
+
+UENUM(BlueprintType)
+enum JackState { IDLE, RUNNING, JUMPING, ATTACKING, DODGING, AIMING, HURT, CROUCHING, SPRINTING };
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -50,47 +52,31 @@ class AProject_JackOLanternCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* ThrowAction;
 
+	/** Interact Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* InteractAction;
 
-	//-----------Health-----------
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	float health;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* SprintAction;
 
-	//----------Pickups-------------
-	UPROPERTY(EditAnywhere, BlueprintReadonly, meta = (AllowPrivateAccess = "true"))
-	int numCandy;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* CrouchAction;
 
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<AThrowable> throwable;
-
-	//has enemy found the player
-	bool isDetected;
-
-	//Is player interacting
-	bool interacting;
-
-	//Reference to open door
-	class ADoor* Door;
-	
+	// -------------------------------------- Variables ----------------------------------------
+	JackState PlayerState;
+	float runSpeed;
+	float sprintSpeed;
+	float crouchSpeed;
+	bool isSprinting;
+	bool isCrouching;
 	
 public:
 	AProject_JackOLanternCharacter();
-
-	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
-	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
-
-	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-
-	void AddCandy();
-
+	void Print(FString message);
+	
 	UFUNCTION(BlueprintCallable)
-	int GetCandy();
-
-	void startInteracting();
-	void stopInteracting();
-	FORCEINLINE bool isInteracting() const { return interacting; };
-
+	JackState GetJackState() const {return PlayerState;}
+	
 protected:
 
 	/** Called for movement input */
@@ -99,16 +85,18 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
-	/** Called for throwing input */
+	// ----------------- Actions ------------------------------
+	void SprintStart(const FInputActionValue& Value);
+	void SprintStop(const FInputActionValue& Value);
+	void CrouchStart(const FInputActionValue& Value);
+	void CrouchStop(const FInputActionValue& Value);
+	void Dodge(const FInputActionValue& Value);
 	void Throw();
 
 protected:
-	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
-	// To add mapping context
 	virtual void BeginPlay();
-
+	virtual void Tick(float DeltaSeconds) override;
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }

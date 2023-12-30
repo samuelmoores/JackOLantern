@@ -1,8 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Project_JackOLanternCharacter.h"
-
-#include "Door.h"
 #include "Engine/LocalPlayer.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -55,34 +53,6 @@ AProject_JackOLanternCharacter::AProject_JackOLanternCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
-
-	Door = nullptr;
-}
-
-void AProject_JackOLanternCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
-{
-	Super::NotifyActorBeginOverlap(OtherActor);
-	if(OtherActor->IsA(ADoor::StaticClass()))
-	{
-		Door = Cast<ADoor>(OtherActor);
-	}
-}
-
-void AProject_JackOLanternCharacter::NotifyActorEndOverlap(AActor* OtherActor)
-{
-	Super::NotifyActorEndOverlap(OtherActor);
-	if(Door)
-	{
-		Door = nullptr;
-	}
-}
-
-float AProject_JackOLanternCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
-                                                 AController* EventInstigator, AActor* DamageCauser)
-{
-	health -= DamageAmount;
-
-	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
 void AProject_JackOLanternCharacter::Throw()
@@ -141,37 +111,17 @@ void AProject_JackOLanternCharacter::Throw()
 	
 }
 
-void AProject_JackOLanternCharacter::AddCandy()
-{
-	numCandy++;
-}
-
-int AProject_JackOLanternCharacter::GetCandy()
-{
-	return numCandy;
-}
-
-void AProject_JackOLanternCharacter::startInteracting()
-{
-	if(Door)
-	{
-		Door->Open();
-	}
-}
-
-void AProject_JackOLanternCharacter::stopInteracting()
-{
-	interacting = false;
-}
-
 void AProject_JackOLanternCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
 
-	health = 1.0f;
-	numCandy = 0;
+	runSpeed = 500.0f;
+	sprintSpeed = 700.0f;
+	crouchSpeed = 75.0f;
 
+	PlayerState = IDLE;
+	
 	//Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
@@ -180,6 +130,48 @@ void AProject_JackOLanternCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+}
+
+void AProject_JackOLanternCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if(GetCharacterMovement()->Velocity.IsZero() && !isCrouching)
+	{
+		PlayerState = IDLE;
+	}
+	else if(GetCharacterMovement()->Velocity.IsZero() && isCrouching)
+	{
+		PlayerState = CROUCHING;
+	}
+
+	if(GetCharacterMovement()->IsFalling())
+	{
+		PlayerState = JUMPING;
+	}
+
+	/*
+	switch (PlayerState)
+	{
+	case IDLE:
+		Print("idle");
+		break;
+	case RUNNING:
+		Print("run");
+		break;
+	case JUMPING:
+		Print("jump");
+		break;
+	case SPRINTING:
+		Print("sprint");
+		break;
+	case CROUCHING:
+		Print("crouch");
+		break;
+	default:
+		Print("no state");
+	}
+	*/
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -203,13 +195,15 @@ void AProject_JackOLanternCharacter::SetupPlayerInputComponent(UInputComponent* 
 		//Throwing
 		EnhancedInputComponent->BindAction(ThrowAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::Throw);
 
-		//Interacting
-		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::startInteracting);
-		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &AProject_JackOLanternCharacter::stopInteracting);
+		//Sprinting
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::SprintStart);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &AProject_JackOLanternCharacter::SprintStop);
+
+		//Crouching
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::CrouchStart);
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AProject_JackOLanternCharacter::CrouchStop);
 
 		//Another New Event
-
-		
 	}
 	else
 	{
@@ -217,10 +211,37 @@ void AProject_JackOLanternCharacter::SetupPlayerInputComponent(UInputComponent* 
 	}
 }
 
+void AProject_JackOLanternCharacter::Print(FString message)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, message, true);
+}
+
 void AProject_JackOLanternCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
+
+	if(isSprinting && !GetCharacterMovement()->IsFalling())
+	{
+		PlayerState = SPRINTING;
+}
+	else if(isCrouching&& !GetCharacterMovement()->IsFalling()) 
+	{
+		PlayerState = CROUCHING;
+	}
+	else if(GetCharacterMovement()->IsFalling())
+	{
+		PlayerState = JUMPING;
+	}
+	else
+	{
+		PlayerState = RUNNING;
+	}
+
+	if(!GetCharacterMovement()->IsFalling())
+	{
+		//Print(FString::SanitizeFloat(GetCharacterMovement()->Velocity.Length()));
+	}
 
 	if (Controller != nullptr)
 	{
@@ -250,6 +271,42 @@ void AProject_JackOLanternCharacter::Look(const FInputActionValue& Value)
 		// add yaw and pitch input to controller
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
+	}
+}
+
+void AProject_JackOLanternCharacter::SprintStart(const FInputActionValue& Value)
+{
+	if(!isCrouching && !GetCharacterMovement()->IsFalling())
+	{
+		isSprinting = true;
+		GetCharacterMovement()->MaxWalkSpeed = sprintSpeed;
+	}
+}
+
+void AProject_JackOLanternCharacter::SprintStop(const FInputActionValue& Value)
+{
+	if(!isCrouching && !GetCharacterMovement()->IsFalling())
+	{
+		isSprinting = false;
+		GetCharacterMovement()->MaxWalkSpeed = runSpeed;
+	}
+}
+
+void AProject_JackOLanternCharacter::CrouchStart(const FInputActionValue& Value)
+{
+	if(!isSprinting&& !GetCharacterMovement()->IsFalling())
+	{
+		isCrouching = true;
+		GetCharacterMovement()->MaxWalkSpeed = crouchSpeed;
+	}
+}
+
+void AProject_JackOLanternCharacter::CrouchStop(const FInputActionValue& Value)
+{
+	if(!isSprinting&& !GetCharacterMovement()->IsFalling())
+	{
+		isCrouching = false;
+		GetCharacterMovement()->MaxWalkSpeed = runSpeed;	
 	}
 }
 
