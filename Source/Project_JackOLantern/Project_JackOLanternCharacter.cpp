@@ -119,8 +119,13 @@ void AProject_JackOLanternCharacter::BeginPlay()
 	runSpeed = 500.0f;
 	sprintSpeed = 700.0f;
 	crouchSpeed = 75.0f;
+	isSprinting = false;
+	isCrouching = false;
+	isDodging = false;
+	isAttacking = false;
 
-	PlayerState = IDLE;
+	PlayerStateMovement = IDLE;
+	PlayerStateAttacking = NOTATTACKING;
 	
 	//Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
@@ -136,42 +141,47 @@ void AProject_JackOLanternCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	if(GetCharacterMovement()->Velocity.IsZero() && !isCrouching)
+	if(GetCharacterMovement()->Velocity.IsZero())
 	{
-		PlayerState = IDLE;
-	}
-	else if(GetCharacterMovement()->Velocity.IsZero() && isCrouching)
-	{
-		PlayerState = CROUCHING;
+		SetIdleState();
 	}
 
-	if(GetCharacterMovement()->IsFalling())
-	{
-		PlayerState = JUMPING;
-	}
+	 /*switch (PlayerStateMovement)
+	 {
+	 case IDLE:
+	 	Print("idle");
+	 	break;
+	 case RUNNING:
+	 	Print("run");
+	 	break;
+	 case JUMPING:
+	 	Print("jump");
+	 	break;
+	 case SPRINTING:
+	 	Print("sprint");
+	 	break;
+	 case CROUCHING:
+	 	Print("crouch");
+	 	break;
+	 case DODGING:
+	 	Print("dodge");
+	 	break;
+	 default:
+	 	Print("no state");
+	 }*/
 
-	/*
-	switch (PlayerState)
+	/*switch(PlayerStateAttacking)
 	{
-	case IDLE:
-		Print("idle");
+	case MELEE:
+		Print("Melee");
 		break;
-	case RUNNING:
-		Print("run");
-		break;
-	case JUMPING:
-		Print("jump");
-		break;
-	case SPRINTING:
-		Print("sprint");
-		break;
-	case CROUCHING:
-		Print("crouch");
+	case NOTATTACKING:
+		Print("Not Attacking");
 		break;
 	default:
-		Print("no state");
-	}
-	*/
+		Print("no attack state");
+	}*/
+	
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -203,6 +213,12 @@ void AProject_JackOLanternCharacter::SetupPlayerInputComponent(UInputComponent* 
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::CrouchStart);
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AProject_JackOLanternCharacter::CrouchStop);
 
+		//Dodging
+		EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::Dodge);
+
+		//Attacking
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::Attack);
+
 		//Another New Event
 	}
 	else
@@ -216,33 +232,96 @@ void AProject_JackOLanternCharacter::Print(FString message)
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, message, true);
 }
 
+void AProject_JackOLanternCharacter::SetState()
+{
+	float velMag = GetCharacterMovement()->Velocity.Length();
+	
+	if(GetCharacterMovement()->Velocity.IsZero())
+	{
+		PlayerStateMovement = IDLE;
+	}
+	else if(velMag > crouchSpeed && velMag < sprintSpeed)
+	{
+		PlayerStateMovement = RUNNING;
+	}
+	else if(GetCharacterMovement()->IsFalling())
+	{
+		PlayerStateMovement = JUMPING;
+	}
+	else if(isSprinting)
+	{
+		PlayerStateMovement = SPRINTING;
+	}
+	else if(isCrouching)
+	{
+		PlayerStateMovement = CROUCHING;
+	}
+	else if(isDodging)
+	{
+		PlayerStateMovement = DODGING;
+	}
+}
+
+void AProject_JackOLanternCharacter::SetIdleState()
+{
+	if(isCrouching)
+	{
+		PlayerStateMovement = CROUCHING;
+		if(isDodging)
+		{
+			PlayerStateMovement = DODGING;
+		}
+	}
+	else if(isDodging)
+	{
+		PlayerStateMovement = DODGING;
+	}
+	else if(isAttacking)
+	{
+	}
+	else
+	{
+		PlayerStateMovement = IDLE;
+	}
+	
+}
+
+void AProject_JackOLanternCharacter::SetMoveState()
+{
+	if(!isSprinting && !isCrouching)
+	{
+		if(GetCharacterMovement()->IsFalling())
+		{
+			PlayerStateMovement = JUMPING;
+		}
+		else if(isDodging)
+		{
+			PlayerStateMovement = DODGING;
+		}
+		else if(isAttacking)
+		{
+		}
+		else
+		{
+			PlayerStateMovement = RUNNING;
+		}
+	}
+	else if(isDodging)
+	{
+		PlayerStateMovement = DODGING;
+	}
+	else if(isAttacking)
+	{
+	}
+}
+
 void AProject_JackOLanternCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
-	if(isSprinting && !GetCharacterMovement()->IsFalling())
-	{
-		PlayerState = SPRINTING;
-}
-	else if(isCrouching&& !GetCharacterMovement()->IsFalling()) 
-	{
-		PlayerState = CROUCHING;
-	}
-	else if(GetCharacterMovement()->IsFalling())
-	{
-		PlayerState = JUMPING;
-	}
-	else
-	{
-		PlayerState = RUNNING;
-	}
-
-	if(!GetCharacterMovement()->IsFalling())
-	{
-		//Print(FString::SanitizeFloat(GetCharacterMovement()->Velocity.Length()));
-	}
-
+	SetMoveState();
+	
 	if (Controller != nullptr)
 	{
 		// find out which way is forward
@@ -274,10 +353,21 @@ void AProject_JackOLanternCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
+void AProject_JackOLanternCharacter::Jump()
+{
+	Super::Jump();
+	PlayerStateMovement = JUMPING;
+	GetCharacterMovement()->MaxWalkSpeed = runSpeed;
+	isCrouching = false;
+	isSprinting = false;
+	isDodging = false;
+}
+
 void AProject_JackOLanternCharacter::SprintStart(const FInputActionValue& Value)
 {
-	if(!isCrouching && !GetCharacterMovement()->IsFalling())
+	if(!isCrouching && !GetCharacterMovement()->IsFalling() && PlayerStateMovement == RUNNING)
 	{
+		PlayerStateMovement = SPRINTING;
 		isSprinting = true;
 		GetCharacterMovement()->MaxWalkSpeed = sprintSpeed;
 	}
@@ -285,10 +375,11 @@ void AProject_JackOLanternCharacter::SprintStart(const FInputActionValue& Value)
 
 void AProject_JackOLanternCharacter::SprintStop(const FInputActionValue& Value)
 {
-	if(!isCrouching && !GetCharacterMovement()->IsFalling())
+	if(!isCrouching && !GetCharacterMovement()->IsFalling() && isSprinting)
 	{
 		isSprinting = false;
 		GetCharacterMovement()->MaxWalkSpeed = runSpeed;
+		PlayerStateMovement = IDLE;
 	}
 }
 
@@ -296,6 +387,7 @@ void AProject_JackOLanternCharacter::CrouchStart(const FInputActionValue& Value)
 {
 	if(!isSprinting&& !GetCharacterMovement()->IsFalling())
 	{
+		PlayerStateMovement = CROUCHING;
 		isCrouching = true;
 		GetCharacterMovement()->MaxWalkSpeed = crouchSpeed;
 	}
@@ -303,11 +395,46 @@ void AProject_JackOLanternCharacter::CrouchStart(const FInputActionValue& Value)
 
 void AProject_JackOLanternCharacter::CrouchStop(const FInputActionValue& Value)
 {
-	if(!isSprinting&& !GetCharacterMovement()->IsFalling())
+	if(!isSprinting && !GetCharacterMovement()->IsFalling())
 	{
 		isCrouching = false;
-		GetCharacterMovement()->MaxWalkSpeed = runSpeed;	
+		GetCharacterMovement()->MaxWalkSpeed = runSpeed;
+		PlayerStateMovement = IDLE;
 	}
+}
+
+void AProject_JackOLanternCharacter::Dodge(const FInputActionValue& Value)
+{
+	isDodging = true;
+}
+
+void AProject_JackOLanternCharacter::Attack(const FInputActionValue& Value)
+{
+	isAttacking = true;
+	PlayerStateAttacking = MELEE;
+}
+
+void AProject_JackOLanternCharacter::EndDodge()
+{
+	isDodging = false;
+	if(isCrouching)
+	{
+		PlayerStateMovement = CROUCHING;
+	}
+	else if(isSprinting)
+	{
+		PlayerStateMovement = SPRINTING;
+	}
+	else
+	{
+		PlayerStateMovement = IDLE;
+	}
+}
+
+void AProject_JackOLanternCharacter::EndAttack()
+{
+	isAttacking = false;
+	PlayerStateAttacking = NOTATTACKING;
 }
 
 

@@ -15,7 +15,10 @@ class UInputAction;
 struct FInputActionValue;
 
 UENUM(BlueprintType)
-enum JackState { IDLE, RUNNING, JUMPING, ATTACKING, DODGING, AIMING, HURT, CROUCHING, SPRINTING };
+enum MovementState { IDLE, RUNNING, JUMPING, DODGING, HURT, CROUCHING, SPRINTING };
+
+UENUM(BlueprintType)
+enum AttackingState { NOTATTACKING, SHOOOTING, RELOADING, AIMING, MELEE };
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -62,45 +65,67 @@ class AProject_JackOLanternCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* CrouchAction;
 
-	// -------------------------------------- Variables ----------------------------------------
-	JackState PlayerState;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* DodgeAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* AttackAction;
+
+	// -------------------------------------- Variables ---------------------------------------------------------
+	MovementState PlayerStateMovement;
+	AttackingState PlayerStateAttacking;
 	float runSpeed;
 	float sprintSpeed;
 	float crouchSpeed;
 	bool isSprinting;
 	bool isCrouching;
-	
-public:
-	AProject_JackOLanternCharacter();
-	void Print(FString message);
-	
-	UFUNCTION(BlueprintCallable)
-	JackState GetJackState() const {return PlayerState;}
+	float dodgeSpeed;
+	bool isDodging;
+	int attackStrength;
+	bool isAttacking;
 	
 protected:
 
-	/** Called for movement input */
+	// ------------------------------------ Actions -------------------------------------------------------------
 	void Move(const FInputActionValue& Value);
-
-	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
-
-	// ----------------- Actions ------------------------------
+	virtual void Jump() override;
 	void SprintStart(const FInputActionValue& Value);
 	void SprintStop(const FInputActionValue& Value);
 	void CrouchStart(const FInputActionValue& Value);
 	void CrouchStop(const FInputActionValue& Value);
 	void Dodge(const FInputActionValue& Value);
+	void Attack(const FInputActionValue& Value);
 	void Throw();
 
-protected:
+	//--------------------------------- Anim Functions-----------------------------------------------------------
+	UFUNCTION(BlueprintCallable)
+	void EndDodge();
+
+	UFUNCTION(BlueprintCallable)
+	void EndAttack();
+
+	// -------------------------------- Overridden UE Functions -------------------------------------------------
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay();
 	virtual void Tick(float DeltaSeconds) override;
+	
 public:
-	/** Returns CameraBoom subobject **/
+	AProject_JackOLanternCharacter();
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	//------------------------------------------- Our Functions -------------------------------------------------
+	void Print(FString message);
+
+	UFUNCTION(BlueprintCallable)
+	MovementState GetJackStateMovement() const {return PlayerStateMovement;}
+
+	UFUNCTION(BlueprintCallable)
+	AttackingState GetJackStateAttacking() const {return PlayerStateAttacking;}
+
+	void SetState();
+	void SetIdleState();
+	void SetMoveState();
 };
 
