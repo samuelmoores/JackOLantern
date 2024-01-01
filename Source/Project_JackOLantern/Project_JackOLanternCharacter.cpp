@@ -11,6 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Throwable.h"
+#include "DSP/AudioDebuggingUtilities.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -116,16 +117,27 @@ void AProject_JackOLanternCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
+	//Movement
 	runSpeed = 500.0f;
 	sprintSpeed = 700.0f;
 	crouchSpeed = 75.0f;
 	isSprinting = false;
 	isCrouching = false;
 	isDodging = false;
-	isAttacking = false;
 
+	//Attacking
+	isAttacking = false;
+	isReloading = false;
+	isShooting = false;
+	hasGun = true;
+	hasPistol = true;
+	hasRifle = false;
+	selectedWeapon = 0;
+
+	//States
 	PlayerStateMovement = IDLE;
 	PlayerStateAttacking = NOTATTACKING;
+	PlayerStateWeapon = UNARMED;
 	
 	//Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
@@ -175,11 +187,35 @@ void AProject_JackOLanternCharacter::Tick(float DeltaSeconds)
 	case MELEE:
 		Print("Melee");
 		break;
+	case AIMING_PISTOL:
+		Print("Aiming Pistol");
+		break;
+	case RELOADING_PISTOL:
+		Print("Reloading Pistol");
+		break;
+	case SHOOOTING_PISTOL:
+		Print("Shooting Pistol");
+		break;
 	case NOTATTACKING:
 		Print("Not Attacking");
 		break;
 	default:
 		Print("no attack state");
+	}*/
+
+	/*switch(PlayerStateWeapon)
+	{
+	case HAS_PISTOL:
+		Print("Has Pistol");
+		break;
+	case HAS_RIFLE:
+		Print("Has Rifle");
+		break;
+	case HAS_MELEEWEAPON:
+		Print("Has Melee Weapon");
+		break;
+	default:
+		Print("no weapon state");
 	}*/
 	
 }
@@ -219,6 +255,13 @@ void AProject_JackOLanternCharacter::SetupPlayerInputComponent(UInputComponent* 
 		//Attacking
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::Attack);
 
+		//Crouching
+		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::AimStart);
+		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &AProject_JackOLanternCharacter::AimStop);
+
+		//Changing Weapon
+		EnhancedInputComponent->BindAction(ChangeWeaponAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::ChangeWeapon);
+		
 		//Another New Event
 	}
 	else
@@ -413,6 +456,45 @@ void AProject_JackOLanternCharacter::Attack(const FInputActionValue& Value)
 	isAttacking = true;
 	PlayerStateAttacking = MELEE;
 }
+
+void AProject_JackOLanternCharacter::AimStart(const FInputActionValue& Value)
+{
+	if(hasGun)
+	{
+		if(!isShooting && !isReloading && !isDodging)
+		{
+			if(hasPistol)
+			{
+				PlayerStateWeapon = HAS_PISTOL;
+			}
+		}
+	}
+}
+
+void AProject_JackOLanternCharacter::AimStop(const FInputActionValue& Value)
+{
+	PlayerStateWeapon = UNARMED;
+
+}
+
+void AProject_JackOLanternCharacter::ChangeWeapon(const FInputActionValue& Value)
+{
+	switch(selectedWeapon)
+	{
+	case 0:
+		PlayerStateWeapon = UNARMED;
+	case 1:
+		PlayerStateWeapon = HAS_MELEEWEAPON;
+		break;
+	case 2:
+		PlayerStateWeapon = HAS_PISTOL;
+		break;
+	case 3:
+		PlayerStateWeapon = HAS_RIFLE;
+		break;
+	}
+}
+
 
 void AProject_JackOLanternCharacter::EndDodge()
 {
