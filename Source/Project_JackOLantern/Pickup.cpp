@@ -2,9 +2,8 @@
 
 #include "Pickup.h"
 #include "Runtime/Engine/Classes/Particles/ParticleSystemComponent.h"
-
-#include "Project_JackOLanternCharacter.h"
-#include "Kismet/GameplayStatics.h"
+#include "Components/AudioComponent.h"
+#include "Components/BoxComponent.h"
 
 // Sets default values
 APickup::APickup()
@@ -14,8 +13,11 @@ APickup::APickup()
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
 	Mesh->SetupAttachment(RootComponent);
-	
+
 	ParticleSystem = CreateDefaultSubobject<UParticleSystemComponent>("ParticleSystem");
+	ParticleSystem->SetupAttachment(RootComponent);
+
+	Sound = CreateDefaultSubobject<UAudioComponent>("Sound");
 	ParticleSystem->SetupAttachment(Mesh);
 
 }
@@ -26,10 +28,12 @@ void APickup::BeginPlay()
 	Super::BeginPlay();
 	rotation = 0.0f;
 	rotationSpeed = 75.0f;
+	moveSpeed = 50.0f;
 
-	ParticleSystem->Deactivate();
-	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	startLocation = GetActorLocation();
+	endLocation = GetActorLocation() + FVector(0.0f, 0.0f, 100.0f);
 
+	keyFound = false;
 }
 
 // Called every frame
@@ -38,17 +42,47 @@ void APickup::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	
 	rotation += DeltaTime;
-	SetActorRelativeRotation(FRotator(0.0f, rotation * 75.0f, 0.0f));
+	SetActorRelativeRotation(FRotator(0.0f, rotation * rotationSpeed, 0.0f));
 
 }
 
 void APickup::NotifyActorBeginOverlap(AActor* OtherActor)
 {
-	if(OtherActor->ActorHasTag("Player"))
+	if(OtherActor->ActorHasTag("Player") && !keyFound)
 	{
+		keyFound = true;
 		ParticleSystem->Activate();
-		Mesh->SetVisibility(false);
+		rotationSpeed = 1000.0f;
+		Sound->Play();
+		startTime = GetWorld()->GetTimeSeconds();
+		GetWorldTimerManager().SetTimer(Timer, this, &APickup::HideMesh, GetWorld()->GetDeltaSeconds(), true);
 	}
 	
 }
+
+void APickup::HideMesh()
+{
+	float elapsedTime = GetWorld()->GetTimeSeconds() - startTime;
+
+	// Check if the Mesh is valid before attempting to hide it
+	if(Mesh && elapsedTime > 2.0f)
+	{
+		ParticleSystem->Deactivate();
+		ParticleSystem->Activate();
+		Mesh->SetVisibility(false);
+		GetWorldTimerManager().ClearTimer(Timer);
+		
+	}
+	else
+	{
+		float Alpha = FMath::Clamp(elapsedTime, 0.0f, 2.0f);
+		Mesh->SetWorldLocation(FMath::Lerp(startLocation, endLocation, Alpha));
+	}
+}
+
+void APickup::Print(FString message)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, message, true);
+}
+
 

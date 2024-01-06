@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Project_JackOLanternCharacter.h"
 #include "Engine/DamageEvents.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AEnemy::AEnemy()
@@ -26,6 +27,20 @@ void AEnemy::BeginPlay()
 	
 }
 
+void AEnemy::Move(float DeltaTime)
+{
+	FVector DirectionToPlayer = Player->GetActorLocation() - GetActorLocation();
+	DirectionToPlayer.Normalize();
+
+	FVector MovementVector = DirectionToPlayer ;
+
+	FRotator NewRotation = MovementVector.ToOrientationRotator();
+	SetActorRotation(NewRotation);
+
+	GetCharacterMovement()->AddInputVector(MovementVector);
+	
+}
+
 // Called every frame
 void AEnemy::Tick(float DeltaTime)
 {
@@ -34,11 +49,19 @@ void AEnemy::Tick(float DeltaTime)
 	distanceFromPlayer = FVector::Distance(GetActorLocation(), Player->GetActorLocation());
 	FDamageEvent damg;
 
+
 	if(distanceFromPlayer < 90.0f)
 	{
-		Player->TakeDamage(0.001f, damg, Player->GetController(), this);
 	}
+	else
+	{
+		Move(DeltaTime);
+	}
+}
 
+void AEnemy::Print(FString message)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, message, true);
 }
 
 // Called to bind functionality to input
@@ -48,10 +71,4 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 }
 
-float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
-	AActor* DamageCauser)
-{
-	health -= 0.01f;
-	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-}
 

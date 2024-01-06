@@ -6,12 +6,15 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Particles/ParticleSystemComponent.h"
 #include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "Pot.h"
 #include "Throwable.h"
 #include "DSP/AudioDebuggingUtilities.h"
+#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -51,6 +54,13 @@ AProject_JackOLanternCharacter::AProject_JackOLanternCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+
+	//Set Particle System
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> SparksFinder(TEXT("/Game/StarterContent/Particles/P_Explosion"));
+	if(SparksFinder.Succeeded())
+	{
+		HitParticles = SparksFinder.Object;
+	}
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -129,15 +139,18 @@ void AProject_JackOLanternCharacter::BeginPlay()
 	isAttacking = false;
 	isReloading = false;
 	isShooting = false;
-	hasGun = true;
-	hasPistol = true;
+	isAiming = false;
+	hasGun = false;
+	hasPistol = false;
 	hasRifle = false;
 	selectedWeapon = 0;
+	hasPot = false;
 
 	//States
 	PlayerStateMovement = IDLE;
 	PlayerStateAttacking = NOTATTACKING;
 	PlayerStateWeapon = UNARMED;
+	
 	
 	//Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
@@ -220,53 +233,12 @@ void AProject_JackOLanternCharacter::Tick(float DeltaSeconds)
 	
 }
 
-//////////////////////////////////////////////////////////////////////////
-// Input
-
-void AProject_JackOLanternCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void AProject_JackOLanternCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 {
-	// Set up action bindings
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
-		
-		// Jumping
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-
-		// Moving
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AProject_JackOLanternCharacter::Move);
-
-		// Looking
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AProject_JackOLanternCharacter::Look);
-
-		//Throwing
-		EnhancedInputComponent->BindAction(ThrowAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::Throw);
-
-		//Sprinting
-		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::SprintStart);
-		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &AProject_JackOLanternCharacter::SprintStop);
-
-		//Crouching
-		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::CrouchStart);
-		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AProject_JackOLanternCharacter::CrouchStop);
-
-		//Dodging
-		EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::Dodge);
-
-		//Attacking
-		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::Attack);
-
-		//Crouching
-		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::AimStart);
-		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &AProject_JackOLanternCharacter::AimStop);
-
-		//Changing Weapon
-		EnhancedInputComponent->BindAction(ChangeWeaponAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::ChangeWeapon);
-		
-		//Another New Event
-	}
-	else
+	Super::NotifyActorBeginOverlap(OtherActor);
+	if(OtherActor->ActorHasTag("Pot"))
 	{
-		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+		Pot = Cast<APot>(OtherActor);
 	}
 }
 
@@ -358,6 +330,69 @@ void AProject_JackOLanternCharacter::SetMoveState()
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////
+// Input
+
+void AProject_JackOLanternCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	// Set up action bindings
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
+		
+		// Jumping
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+
+		// Moving
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AProject_JackOLanternCharacter::Move);
+
+		// Looking
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AProject_JackOLanternCharacter::Look);
+
+		//Throwing
+		EnhancedInputComponent->BindAction(ThrowAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::Throw);
+
+		//Sprinting
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::SprintStart);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &AProject_JackOLanternCharacter::SprintStop);
+
+		//Crouching
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::CrouchStart);
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AProject_JackOLanternCharacter::CrouchStop);
+
+		//Dodging
+		EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::Dodge);
+
+		//Attacking
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::Attack);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Completed, this, &AProject_JackOLanternCharacter::EndAttack);
+
+		//Crouching
+		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::AimStart);
+		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &AProject_JackOLanternCharacter::AimStop);
+
+		//Changing Weapon
+		EnhancedInputComponent->BindAction(ChangeWeaponAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::ChangeWeapon);
+
+		//Shooting
+		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::ShootStart);
+		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Completed, this, &AProject_JackOLanternCharacter::ShootStop);
+
+		//Reloading
+		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::ReloadStart);
+
+		//Interacting
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::InteractStart);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &AProject_JackOLanternCharacter::InteractStop);
+
+		
+		//Another New Event
+	}
+	else
+	{
+		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+	}
+}
+
 void AProject_JackOLanternCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
@@ -400,10 +435,12 @@ void AProject_JackOLanternCharacter::Jump()
 {
 	Super::Jump();
 	PlayerStateMovement = JUMPING;
+	PlayerStateAttacking = NOTATTACKING;
 	GetCharacterMovement()->MaxWalkSpeed = runSpeed;
 	isCrouching = false;
 	isSprinting = false;
 	isDodging = false;
+	isAiming = false;
 }
 
 void AProject_JackOLanternCharacter::SprintStart(const FInputActionValue& Value)
@@ -428,7 +465,7 @@ void AProject_JackOLanternCharacter::SprintStop(const FInputActionValue& Value)
 
 void AProject_JackOLanternCharacter::CrouchStart(const FInputActionValue& Value)
 {
-	if(!isSprinting&& !GetCharacterMovement()->IsFalling())
+	if(!isSprinting && !GetCharacterMovement()->IsFalling() && !isReloading)
 	{
 		PlayerStateMovement = CROUCHING;
 		isCrouching = true;
@@ -453,8 +490,11 @@ void AProject_JackOLanternCharacter::Dodge(const FInputActionValue& Value)
 
 void AProject_JackOLanternCharacter::Attack(const FInputActionValue& Value)
 {
-	isAttacking = true;
-	PlayerStateAttacking = MELEE;
+	if(hasPot)
+	{
+		isAttacking = true;
+		PlayerStateAttacking = MELEE;
+	}
 }
 
 void AProject_JackOLanternCharacter::AimStart(const FInputActionValue& Value)
@@ -465,7 +505,13 @@ void AProject_JackOLanternCharacter::AimStart(const FInputActionValue& Value)
 		{
 			if(hasPistol)
 			{
-				PlayerStateWeapon = HAS_PISTOL;
+				isAiming = true;
+				PlayerStateAttacking = AIMING_PISTOL;
+			}
+			else if(hasRifle)
+			{
+				isAiming = true;
+				PlayerStateAttacking = AIMING_RIFLE;
 			}
 		}
 	}
@@ -473,7 +519,11 @@ void AProject_JackOLanternCharacter::AimStart(const FInputActionValue& Value)
 
 void AProject_JackOLanternCharacter::AimStop(const FInputActionValue& Value)
 {
-	PlayerStateWeapon = UNARMED;
+	if(hasGun && isAiming)
+	{
+		isAiming = false;
+		PlayerStateAttacking = NOTATTACKING;
+	}
 
 }
 
@@ -487,14 +537,100 @@ void AProject_JackOLanternCharacter::ChangeWeapon(const FInputActionValue& Value
 		PlayerStateWeapon = HAS_MELEEWEAPON;
 		break;
 	case 2:
-		PlayerStateWeapon = HAS_PISTOL;
+		//PlayerStateWeapon = HAS_PISTOL;
 		break;
 	case 3:
-		PlayerStateWeapon = HAS_RIFLE;
+		//PlayerStateWeapon = HAS_RIFLE;
 		break;
+	default:
+		PlayerStateWeapon = UNARMED;
 	}
 }
 
+void AProject_JackOLanternCharacter::ShootStart(const FInputActionValue& Value)
+{
+	if(isAiming && !isShooting)
+	{
+		isShooting = true;
+		FHitResult Hit;
+		FVector Start =  GetFollowCamera()->GetComponentLocation();
+		FVector End = Start + GetFollowCamera()->GetForwardVector() * 10000;
+		bool hit = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_WorldDynamic, FCollisionQueryParams::DefaultQueryParam, FCollisionResponseParams::DefaultResponseParam);
+		if(hit)
+		{
+			FTransform SpawnTransform(Hit.ImpactNormal.Rotation(), Hit.ImpactPoint);
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticles, SpawnTransform);
+		}
+		else
+		{
+			Print("Not hit");
+		}
+	}
+}
+
+void AProject_JackOLanternCharacter::ReloadStart(const FInputActionValue& Value)
+{
+	if(hasGun && !isReloading)
+	{
+		if(hasPistol)
+		{
+			isReloading = true;
+			PlayerStateAttacking = RELOADING_PISTOL;
+			
+		}
+		else if(hasRifle)
+		{
+			isReloading = true;
+			PlayerStateAttacking = RELOADING_PISTOL;
+			
+		}
+	}
+}
+
+void AProject_JackOLanternCharacter::InteractStart(const FInputActionValue& Value)
+{
+	isInteracting = true;
+}
+
+void AProject_JackOLanternCharacter::InteractStop(const FInputActionValue& Value)
+{
+	isInteracting = false;
+}
+
+void AProject_JackOLanternCharacter::ShootStop()
+{
+	isShooting = false;
+
+	if(isAiming)
+	{
+		PlayerStateAttacking = AIMING_PISTOL;
+	}
+	else
+	{
+		PlayerStateAttacking = NOTATTACKING;
+	}
+}
+
+void AProject_JackOLanternCharacter::ReloadStop()
+{
+	isReloading = false;
+	PlayerStateAttacking = NOTATTACKING;
+}
+
+void AProject_JackOLanternCharacter::ThrowPot()
+{
+	if(Pot && isAttacking)
+	{
+		Pot->Throw();
+	}
+}
+
+void AProject_JackOLanternCharacter::EndThrowPot()
+{
+	hasPot = false;
+	PlayerStateAttacking = NOTATTACKING;
+
+}
 
 void AProject_JackOLanternCharacter::EndDodge()
 {
@@ -513,11 +649,7 @@ void AProject_JackOLanternCharacter::EndDodge()
 	}
 }
 
-void AProject_JackOLanternCharacter::EndAttack()
+void AProject_JackOLanternCharacter::EndAttack(const FInputActionValue& Value)
 {
-	isAttacking = false;
-	PlayerStateAttacking = NOTATTACKING;
 }
-
-
 

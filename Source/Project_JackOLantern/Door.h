@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Project_JackOLanternCharacter.h"
 #include "Door.generated.h"
 
 class UBoxComponent;
@@ -12,6 +13,9 @@ UCLASS()
 class PROJECT_JACKOLANTERN_API ADoor : public AActor
 {
 	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* Root;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* Mesh;
@@ -20,9 +24,11 @@ class PROJECT_JACKOLANTERN_API ADoor : public AActor
 	UBoxComponent* BoxCollider;
 
 	bool isOpen;
+	bool playerFound;
 	float openStartTime;
 	float rotateSpeed;
 	FTimerHandle Timer;
+	AProject_JackOLanternCharacter* player;
 	
 public:	
 	// Sets default values for this actor's properties
@@ -34,9 +40,13 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	void Print(FString message);
+
 
 };

@@ -42,23 +42,24 @@ class AProject_JackOLanternCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
 
-	/** Jump Input Action */
+	/** MappingContext */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UParticleSystem* HitParticles;
+
+	//--------------------------------- Input Actions --------------------------------------------------------
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* JumpAction;
 
-	/** Move Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* MoveAction;
 
-	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
 
-	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* ThrowAction;
 
-	/** Interact Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* InteractAction;
 
@@ -79,11 +80,19 @@ class AProject_JackOLanternCharacter : public ACharacter
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* ChangeWeaponAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ShootAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ReloadAction;
 	
 	// -------------------------------------- Variables ---------------------------------------------------------
 	MovementState PlayerStateMovement;
 	AttackingState PlayerStateAttacking;
 	WeaponState PlayerStateWeapon;
+
+	class APot* Pot;
 
 	//movement
 	float runSpeed;
@@ -96,11 +105,10 @@ class AProject_JackOLanternCharacter : public ACharacter
 
 	//attacking
 	int attackStrength;
-	bool isAttacking;
 	bool hasGun;
 	bool hasPistol;
 	bool hasRifle;
-	bool isShooting;
+	bool isAiming;
 	bool isReloading;
 
 protected:
@@ -115,9 +123,14 @@ protected:
 	void CrouchStop(const FInputActionValue& Value);
 	void Dodge(const FInputActionValue& Value);
 	void Attack(const FInputActionValue& Value);
+	void EndAttack(const FInputActionValue& Value);
 	void AimStart(const FInputActionValue& Value);
 	void AimStop(const FInputActionValue& Value);
 	void ChangeWeapon(const FInputActionValue& Value);
+	void ShootStart(const FInputActionValue& Value);
+	void ReloadStart(const FInputActionValue& Value);
+	void InteractStart(const FInputActionValue& Value);
+	void InteractStop(const FInputActionValue& Value);
 	void Throw();
 
 	//--------------------------------- Anim Functions -----------------------------------------------------------
@@ -125,22 +138,46 @@ protected:
 	void EndDodge();
 
 	UFUNCTION(BlueprintCallable)
-	void EndAttack();
+	void ShootStop();
+
+	UFUNCTION(BlueprintCallable)
+	void ReloadStop();
+
+	UFUNCTION(BlueprintCallable)
+	void ThrowPot();
+
+	UFUNCTION(BlueprintCallable)
+	void EndThrowPot();
 
 	// -------------------------------- Overridden UE Functions -------------------------------------------------
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay();
 	virtual void Tick(float DeltaSeconds) override;
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	
 public:
-	AProject_JackOLanternCharacter();
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-
 	//Blueprint Variables
 	UPROPERTY(BlueprintReadWrite)
 	int selectedWeapon;
 	
+	//Blueprint Variables
+	UPROPERTY(BlueprintReadOnly)
+	bool isShooting;
+
+	//Blueprint Variables
+	UPROPERTY(BlueprintReadWrite)
+	bool hasPot;
+
+	//Blueprint Variables
+	UPROPERTY(BlueprintReadOnly)
+	bool isAttacking;
+
+	bool isInteracting;
+	
+	AProject_JackOLanternCharacter();
+	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
 	//------------------------------------------- Our Functions -------------------------------------------------
 	void Print(FString message);
 
