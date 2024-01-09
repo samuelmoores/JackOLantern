@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/Actor.h"
+#include "NiagaraComponent.h"
 #include "Pickup.generated.h"
 
 UCLASS()
@@ -13,17 +14,21 @@ class PROJECT_JACKOLANTERN_API APickup : public AActor
 	GENERATED_BODY()
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UParticleSystemComponent* ParticleSystem;
+	UStaticMeshComponent* Mesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UStaticMeshComponent* Mesh;
+	UBoxComponent* BoxCollider;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UAudioComponent* Sound;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UNiagaraSystem* Explosion;
+	
 public:	
 	// Sets default values for this actor's properties
 	APickup();
+	void Collect();
 
 	float rotation;
 	float rotationSpeed;
@@ -35,17 +40,12 @@ public:
 	bool keyFound;
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
 	void HideMesh();
 
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
-
 	void Print(FString message);
 
 

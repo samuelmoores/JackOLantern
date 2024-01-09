@@ -11,11 +11,8 @@ APot::APot()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	Root = CreateDefaultSubobject<UStaticMeshComponent>("Root");
-	Root->SetupAttachment(RootComponent);
-
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
-	Mesh->SetupAttachment(Root);
+	Mesh->SetupAttachment(RootComponent);
 
 	BoxCollider = CreateDefaultSubobject<UBoxComponent>("BoxCollider");
 	BoxCollider->SetupAttachment(Mesh);
@@ -45,12 +42,6 @@ void APot::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if(freakout)
-	{
-		FVector newScale = Mesh->GetComponentScale();
-		Mesh->SetWorldScale3D(newScale + FVector(0.2f, 0.2f, 0.2f));
-	}
-
 }
 
 void APot::NotifyActorBeginOverlap(AActor* OtherActor)
@@ -71,12 +62,9 @@ void APot::NotifyActorBeginOverlap(AActor* OtherActor)
 		}
 	}
 
-	if(OtherActor->ActorHasTag("Enemy") && !freakout)
+	if(OtherActor->ActorHasTag("Enemy"))
 	{
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(),Explosion, Mesh->GetComponentLocation(),FRotator::ZeroRotator, FVector::One(), false);
-		Mesh->SetSimulatePhysics(false);
-		Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		freakout = true;
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(),Explosion, Mesh->GetComponentLocation(),FRotator::ZeroRotator, FVector::One(), true);
 	}
 
 }

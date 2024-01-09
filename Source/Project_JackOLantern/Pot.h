@@ -3,10 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NiagaraSystem.h"
 #include "GameFramework/Character.h"
 #include "Project_JackOLanternCharacter.h"
 #include "Components/BoxComponent.h"
-#include "NiagaraComponent.h"
+
 #include "Pot.generated.h"
 
 UCLASS()
@@ -18,13 +19,10 @@ class PROJECT_JACKOLANTERN_API APot : public AActor
 	UStaticMeshComponent* Mesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UStaticMeshComponent* Root;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UBoxComponent* BoxCollider;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UNiagaraSystem* Explosion;	
+	UNiagaraSystem* Explosion;
 
 public:
 	// Sets default values for this character's properties

@@ -6,6 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "Project_JackOLanternGameMode.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerDiedSignature, ACharacter*, Character);
+
 UCLASS(minimalapi)
 class AProject_JackOLanternGameMode : public AGameModeBase
 {
@@ -13,6 +15,19 @@ class AProject_JackOLanternGameMode : public AGameModeBase
 
 public:
 	AProject_JackOLanternGameMode();
+
+	const FOnPlayerDiedSignature& GetOnPlayerDied() const { return OnPlayerDied;}
+
+	virtual void RestartPlayer(AController* NewPlayer) override;
+
+protected:
+	virtual void BeginPlay() override;
+
+	UFUNCTION()
+	virtual void PlayerDied(ACharacter* Character);
+
+	UPROPERTY()
+	FOnPlayerDiedSignature OnPlayerDied;
 };
 
 

@@ -13,3 +13,24 @@ AProject_JackOLanternGameMode::AProject_JackOLanternGameMode()
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
 }
+
+void AProject_JackOLanternGameMode::RestartPlayer(AController* NewPlayer)
+{
+	Super::RestartPlayer(NewPlayer);
+}
+
+void AProject_JackOLanternGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if(!OnPlayerDied.IsBound())
+	{
+		OnPlayerDied.AddDynamic(this, &AProject_JackOLanternGameMode::PlayerDied);
+	}
+}
+
+void AProject_JackOLanternGameMode::PlayerDied(ACharacter* Character)
+{
+	AController* CharacterController = Character->GetController();
+	RestartPlayer(CharacterController);
+}

@@ -2,10 +2,8 @@
 
 
 #include "Enemy.h"
-
-#include "Kismet/GameplayStatics.h"
-#include "Project_JackOLanternCharacter.h"
-#include "Engine/DamageEvents.h"
+#include "Project_JackOLanternCharacter.h" 
+#include "NiagaraFunctionLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
@@ -14,6 +12,9 @@ AEnemy::AEnemy()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	HitBox = CreateDefaultSubobject<USphereComponent>("HitBox");
+	HitBox->SetupAttachment(GetMesh(), "index_l_02");
+
 }
 
 // Called when the game starts or when spawned
@@ -21,9 +22,10 @@ void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Player = Cast<AProject_JackOLanternCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 	distanceFromPlayer = 0.0f;
 	health = 1.0f;
+	canAttack = false;
+	attack = false;
 	
 }
 
@@ -46,16 +48,31 @@ void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	distanceFromPlayer = FVector::Distance(GetActorLocation(), Player->GetActorLocation());
-	FDamageEvent damg;
-
-
-	if(distanceFromPlayer < 90.0f)
+	if(Player)
 	{
-	}
-	else
-	{
-		Move(DeltaTime);
+		distanceFromPlayer = FVector::Distance(GetActorLocation(), Player->GetActorLocation());
+	
+		if(!Player->isDead)
+		{
+			if(distanceFromPlayer < 90.0f)
+			{
+				canAttack = true;
+
+			}
+			else
+			{
+
+				if(!canAttack)
+				{
+					Move(DeltaTime);
+				}
+			}
+		
+		}
+		else
+		{
+			canAttack = false;
+		}
 	}
 }
 
@@ -64,11 +81,30 @@ void AEnemy::Print(FString message)
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, message, true);
 }
 
-// Called to bind functionality to input
-void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void AEnemy::NotifyActorBeginOverlap(AActor* OtherActor)
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	Super::NotifyActorBeginOverlap(OtherActor);
 
+	if(OtherActor->ActorHasTag("Player") && attack)
+	{
+		if(Player)
+		{
+			Player->health -= 1.0f;
+			if(Player->health <= 0.0f)
+			{
+				Player->Death();
+				canAttack = false;
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), DeathParticles, GetMesh()->GetComponentLocation(), GetMesh()->GetComponentRotation(), FVector::One(), true);
+
+			}
+		}
+	}
 }
+
+void AEnemy::SetPlayer(AProject_JackOLanternCharacter* RespawnedPlayer)
+{
+	Player = RespawnedPlayer;
+}
+
 
 

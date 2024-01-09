@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Enemy.h"
 #include "InputActionValue.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
@@ -93,6 +94,7 @@ class AProject_JackOLanternCharacter : public ACharacter
 	WeaponState PlayerStateWeapon;
 
 	class APot* Pot;
+	class APickup* Key;
 
 	//movement
 	float runSpeed;
@@ -112,7 +114,6 @@ class AProject_JackOLanternCharacter : public ACharacter
 	bool isReloading;
 
 protected:
-
 	// ------------------------------------ Actions -------------------------------------------------------------
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
@@ -132,6 +133,10 @@ protected:
 	void InteractStart(const FInputActionValue& Value);
 	void InteractStop(const FInputActionValue& Value);
 	void Throw();
+
+	//--------------------------------------Respawning-----------------------------------------------------------
+	virtual void Destroyed() override;
+	void CallRestartPlayer();
 
 	//--------------------------------- Anim Functions -----------------------------------------------------------
 	UFUNCTION(BlueprintCallable)
@@ -154,30 +159,46 @@ protected:
 	virtual void BeginPlay();
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
 	
 public:
-	//Blueprint Variables
-	UPROPERTY(BlueprintReadWrite)
-	int selectedWeapon;
-	
-	//Blueprint Variables
-	UPROPERTY(BlueprintReadOnly)
-	bool isShooting;
-
-	//Blueprint Variables
-	UPROPERTY(BlueprintReadWrite)
-	bool hasPot;
-
-	//Blueprint Variables
-	UPROPERTY(BlueprintReadOnly)
-	bool isAttacking;
-
-	bool isInteracting;
-	
 	AProject_JackOLanternCharacter();
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	
+	//-----------------------------------Blueprint Variables-----------------------------------------------------------
+	UPROPERTY(BlueprintReadOnly)
+	float health;
+	
+	UPROPERTY(BlueprintReadWrite)
+	int selectedWeapon;
+	
+	UPROPERTY(BlueprintReadOnly)
+	bool isShooting;
 
+	UPROPERTY(BlueprintReadWrite)
+	bool hasPot;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool isAttacking;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool foundKey;
+	
+	UPROPERTY(BlueprintReadOnly)
+	bool hasKey;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool isDead;
+
+	//--------------------------------------------Our Variables-------------------------------------------------
+	bool isInteracting;
+	FTimerHandle Timer;
+	float timeOfDeath;
+	float timeSinceDeath;
+	TArray<AActor*> AEnemies;
+	TArray<AEnemy*> Enemies;
+	
 	//------------------------------------------- Our Functions -------------------------------------------------
 	void Print(FString message);
 
@@ -193,5 +214,7 @@ public:
 	void SetState();
 	void SetIdleState();
 	void SetMoveState();
+	void Death();
+	void Respawn();
 };
 

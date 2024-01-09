@@ -11,10 +11,13 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "Pickup.h"
 #include "Pot.h"
 #include "Throwable.h"
+#include "Enemy.h"
 #include "DSP/AudioDebuggingUtilities.h"
 #include "Kismet/GameplayStatics.h"
+#include "Project_JackOLanternGameMode.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -60,6 +63,17 @@ AProject_JackOLanternCharacter::AProject_JackOLanternCharacter()
 	if(SparksFinder.Succeeded())
 	{
 		HitParticles = SparksFinder.Object;
+	}
+
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEnemy::StaticClass(), AEnemies);
+
+	for (AActor* Actor : AEnemies)
+	{
+		AEnemy* Enemy = Cast<AEnemy>(Actor);
+		if(Enemy)
+		{
+			Enemy->SetPlayer(this);
+		}
 	}
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
@@ -122,10 +136,40 @@ void AProject_JackOLanternCharacter::Throw()
 	
 }
 
+void AProject_JackOLanternCharacter::Destroyed()
+{
+	Super::Destroyed();
+
+	if(UWorld* World = GetWorld())
+	{
+		if(AProject_JackOLanternGameMode* GameMode = Cast<AProject_JackOLanternGameMode>(World->GetAuthGameMode()))
+		{
+			GameMode->GetOnPlayerDied().Broadcast(this);
+		}
+	}
+}
+
+void AProject_JackOLanternCharacter::CallRestartPlayer()
+{
+	AController* ControllerRef = GetController();
+
+	Destroy();
+
+	if(UWorld* World =  GetWorld())
+	{
+		if(AProject_JackOLanternGameMode* GameMode = Cast<AProject_JackOLanternGameMode>(World->GetAuthGameMode()))
+		{
+			GameMode->RestartPlayer(ControllerRef);
+		}
+	}
+}
+
 void AProject_JackOLanternCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+
+	health = 1.0f;
 
 	//Movement
 	runSpeed = 500.0f;
@@ -145,12 +189,19 @@ void AProject_JackOLanternCharacter::BeginPlay()
 	hasRifle = false;
 	selectedWeapon = 0;
 	hasPot = false;
+	isDead = false;
+
+	//Keys
+	hasKey = false;
 
 	//States
 	PlayerStateMovement = IDLE;
 	PlayerStateAttacking = NOTATTACKING;
 	PlayerStateWeapon = UNARMED;
-	
+
+	//Death
+	timeOfDeath = 0.0f;
+	timeSinceDeath = 0.0f;
 	
 	//Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
@@ -236,10 +287,29 @@ void AProject_JackOLanternCharacter::Tick(float DeltaSeconds)
 void AProject_JackOLanternCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
+
 	if(OtherActor->ActorHasTag("Pot"))
 	{
 		Pot = Cast<APot>(OtherActor);
 	}
+
+	if(OtherActor->ActorHasTag("Key"))
+	{
+		foundKey = true;
+		Key = Cast<APickup>(OtherActor);
+	}
+	
+}
+
+void AProject_JackOLanternCharacter::NotifyActorEndOverlap(AActor* OtherActor)
+{
+	Super::NotifyActorEndOverlap(OtherActor);
+
+	if(OtherActor->ActorHasTag("Key"))
+	{
+		foundKey = false;
+	}
+	
 }
 
 void AProject_JackOLanternCharacter::Print(FString message)
@@ -330,6 +400,25 @@ void AProject_JackOLanternCharacter::SetMoveState()
 	}
 }
 
+void AProject_JackOLanternCharacter::Death()
+{
+	isDead = true;
+	GetCharacterMovement()->DisableMovement();
+	timeOfDeath = GetWorld()->GetTimeSeconds();
+	GetWorldTimerManager().SetTimer(Timer,this, &AProject_JackOLanternCharacter::Respawn, GetWorld()->DeltaTimeSeconds, true);
+}
+
+void AProject_JackOLanternCharacter::Respawn()
+{
+	timeSinceDeath = GetWorld()->TimeSeconds - timeOfDeath;
+
+	if(timeSinceDeath > 7.0f)
+	{
+		isDead = false;
+		CallRestartPlayer();
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 
@@ -397,11 +486,11 @@ void AProject_JackOLanternCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
-
-	SetMoveState();
 	
-	if (Controller != nullptr)
+	if (Controller != nullptr && !isDead)
 	{
+		SetMoveState();
+
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -433,14 +522,18 @@ void AProject_JackOLanternCharacter::Look(const FInputActionValue& Value)
 
 void AProject_JackOLanternCharacter::Jump()
 {
-	Super::Jump();
-	PlayerStateMovement = JUMPING;
-	PlayerStateAttacking = NOTATTACKING;
-	GetCharacterMovement()->MaxWalkSpeed = runSpeed;
-	isCrouching = false;
-	isSprinting = false;
-	isDodging = false;
-	isAiming = false;
+	if(!isDead)
+	{
+		Super::Jump();
+		PlayerStateMovement = JUMPING;
+		PlayerStateAttacking = NOTATTACKING;
+		GetCharacterMovement()->MaxWalkSpeed = runSpeed;
+		isCrouching = false;
+		isSprinting = false;
+		isDodging = false;
+		isAiming = false;
+	}
+
 }
 
 void AProject_JackOLanternCharacter::SprintStart(const FInputActionValue& Value)
@@ -590,6 +683,16 @@ void AProject_JackOLanternCharacter::ReloadStart(const FInputActionValue& Value)
 void AProject_JackOLanternCharacter::InteractStart(const FInputActionValue& Value)
 {
 	isInteracting = true;
+	
+	if(foundKey)
+	{
+		hasKey = true;
+		foundKey = false;
+		if(Key)
+		{
+			Key->Collect();
+		}
+	}
 }
 
 void AProject_JackOLanternCharacter::InteractStop(const FInputActionValue& Value)
