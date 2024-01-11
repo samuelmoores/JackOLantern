@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+#include "Components/SphereComponent.h"
 #include "Project_JackOLanternCharacter.generated.h"
 
 class USpringArmComponent;
@@ -43,9 +44,13 @@ class AProject_JackOLanternCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
 
-	/** MappingContext */
+	/** IDK */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UParticleSystem* HitParticles;
+
+	/** Hand Sphere Collider for Punch */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	USphereComponent* HitBox;
 
 	//--------------------------------- Input Actions --------------------------------------------------------
 	
@@ -153,6 +158,10 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void EndThrowPot();
+
+	UFUNCTION(BlueprintCallable)
+	void EndAttackAnim();
+
 
 	// -------------------------------- Overridden UE Functions -------------------------------------------------
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

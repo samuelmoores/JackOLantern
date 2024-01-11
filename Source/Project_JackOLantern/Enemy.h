@@ -19,28 +19,48 @@ class PROJECT_JACKOLANTERN_API AEnemy : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UNiagaraSystem* DeathParticles;
 
+protected:
+	// Called when the game starts or when spawned
+	AEnemy();
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+
 public:
-	class AProject_JackOLanternCharacter* Player;
-	float health;
-	float distanceFromPlayer;
-	UAnimationAsset* Animator;
-
-	//-------------------------------------- BlueprintVariables --------------------------------
-	UPROPERTY(BlueprintReadWrite)
-	bool canAttack;
-
+	//-------------------------------------- Blueprint --------------------------------
 	UPROPERTY(BlueprintReadWrite)
 	bool attack;
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-	void Move(float DeltaTime);
+	UPROPERTY(BlueprintReadOnly)
+	bool returningToStart;
+	
+	UFUNCTION(BlueprintCallable)
+	bool GetAttacking() {return attacking;};
 
-public:
-	AEnemy();
-	virtual void Tick(float DeltaTime) override;
+	UFUNCTION(BlueprintCallable)
+	void SetAttacking(bool attackingUpdate) {attacking = attackingUpdate;};
+
+	//-----------------------------------Variables---------------------------------------------------
+	class AProject_JackOLanternCharacter* Player;
+	FTimerHandle Timer;
+	FVector StartingPosition;
+	FRotator StartingRotation;
+	FVector DirectionToMovement;
+	float health;
+	float distanceFromPlayer;
+	float distanceFromStart;
+	bool playerFound;
+	bool attacking;
+	float timeStopPursue;
+	float timeSinceStopPursue;
+	bool playerOnFirstFloor;
+	bool pursuePlayer;
+
+	//--------------------------------Functions------------------------------------------------------
 	void Print(FString message);
-	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	void SetPlayer(AProject_JackOLanternCharacter* RespawnedPlayer);
+	void Move();
+	void ReturnToStart();
+	void PursuePlayer();
+
 };

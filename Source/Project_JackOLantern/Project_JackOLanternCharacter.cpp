@@ -4,9 +4,9 @@
 #include "Engine/LocalPlayer.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SphereComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Particles/ParticleSystemComponent.h"
 #include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -15,7 +15,6 @@
 #include "Pot.h"
 #include "Throwable.h"
 #include "Enemy.h"
-#include "DSP/AudioDebuggingUtilities.h"
 #include "Kismet/GameplayStatics.h"
 #include "Project_JackOLanternGameMode.h"
 
@@ -57,6 +56,9 @@ AProject_JackOLanternCharacter::AProject_JackOLanternCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+
+	HitBox = CreateDefaultSubobject<USphereComponent>(TEXT("Hitbox"));
+	HitBox->SetupAttachment(GetMesh(), "middle_r_01_BIND");
 
 	//Set Particle System
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> SparksFinder(TEXT("/Game/StarterContent/Particles/P_Explosion"));
@@ -222,6 +224,15 @@ void AProject_JackOLanternCharacter::Tick(float DeltaSeconds)
 		SetIdleState();
 	}
 
+	/*if(isAttacking)
+	{
+		Print("attacking");
+	}
+	else
+	{
+		Print("not attacking");
+	}*/
+
 	 /*switch (PlayerStateMovement)
 	 {
 	 case IDLE:
@@ -297,6 +308,11 @@ void AProject_JackOLanternCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 	{
 		foundKey = true;
 		Key = Cast<APickup>(OtherActor);
+	}
+
+	if(OtherActor->ActorHasTag("Enemy"))
+	{
+		Print("HitEnemy");
 	}
 	
 }
@@ -455,6 +471,7 @@ void AProject_JackOLanternCharacter::SetupPlayerInputComponent(UInputComponent* 
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::Attack);
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Completed, this, &AProject_JackOLanternCharacter::EndAttack);
 
+
 		//Crouching
 		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::AimStart);
 		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &AProject_JackOLanternCharacter::AimStop);
@@ -583,10 +600,9 @@ void AProject_JackOLanternCharacter::Dodge(const FInputActionValue& Value)
 
 void AProject_JackOLanternCharacter::Attack(const FInputActionValue& Value)
 {
-	if(hasPot)
+	if(!isAttacking )
 	{
 		isAttacking = true;
-		PlayerStateAttacking = MELEE;
 	}
 }
 
@@ -735,6 +751,15 @@ void AProject_JackOLanternCharacter::EndThrowPot()
 
 }
 
+void AProject_JackOLanternCharacter::EndAttackAnim()
+{
+	if(isAttacking)
+	{
+		isAttacking = false;
+
+	}
+}
+
 void AProject_JackOLanternCharacter::EndDodge()
 {
 	isDodging = false;
@@ -754,5 +779,6 @@ void AProject_JackOLanternCharacter::EndDodge()
 
 void AProject_JackOLanternCharacter::EndAttack(const FInputActionValue& Value)
 {
+		isAttacking = false;
 }
 
