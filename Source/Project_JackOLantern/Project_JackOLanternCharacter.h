@@ -200,6 +200,9 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	bool isDead;
 
+	UPROPERTY(BlueprintReadOnly)
+	bool playAttackAnim;
+
 	//--------------------------------------------Our Variables-------------------------------------------------
 	bool isInteracting;
 	FTimerHandle Timer;

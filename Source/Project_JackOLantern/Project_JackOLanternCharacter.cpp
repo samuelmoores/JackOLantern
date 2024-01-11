@@ -224,6 +224,7 @@ void AProject_JackOLanternCharacter::Tick(float DeltaSeconds)
 		SetIdleState();
 	}
 
+	
 	/*if(isAttacking)
 	{
 		Print("attacking");
@@ -310,9 +311,9 @@ void AProject_JackOLanternCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 		Key = Cast<APickup>(OtherActor);
 	}
 
-	if(OtherActor->ActorHasTag("Enemy"))
+	if(OtherActor->ActorHasTag("Enemy") && isAttacking)
 	{
-		Print("HitEnemy");
+		//Print("HitEnemy");
 	}
 	
 }
@@ -330,7 +331,7 @@ void AProject_JackOLanternCharacter::NotifyActorEndOverlap(AActor* OtherActor)
 
 void AProject_JackOLanternCharacter::Print(FString message)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, message, true);
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, message, true);
 }
 
 void AProject_JackOLanternCharacter::SetState()
@@ -600,10 +601,16 @@ void AProject_JackOLanternCharacter::Dodge(const FInputActionValue& Value)
 
 void AProject_JackOLanternCharacter::Attack(const FInputActionValue& Value)
 {
-	if(!isAttacking )
+	if(!isAttacking && GetCharacterMovement()->Velocity.Z == 0.0f)
 	{
 		isAttacking = true;
+		playAttackAnim = true;
+		if(GetVelocity().Length() < 500.0f)
+		{
+			GetCharacterMovement()->DisableMovement();
+		}
 	}
+	
 }
 
 void AProject_JackOLanternCharacter::AimStart(const FInputActionValue& Value)
@@ -753,11 +760,11 @@ void AProject_JackOLanternCharacter::EndThrowPot()
 
 void AProject_JackOLanternCharacter::EndAttackAnim()
 {
-	if(isAttacking)
-	{
-		isAttacking = false;
+	isAttacking = false;
+	playAttackAnim = false;
 
-	}
+	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	
 }
 
 void AProject_JackOLanternCharacter::EndDodge()
@@ -779,6 +786,6 @@ void AProject_JackOLanternCharacter::EndDodge()
 
 void AProject_JackOLanternCharacter::EndAttack(const FInputActionValue& Value)
 {
-		isAttacking = false;
+		//isAttacking = false;
 }
 
