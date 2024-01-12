@@ -162,14 +162,20 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void EndAttackAnim();
 
-
+	UFUNCTION(BlueprintCallable)
+	void DoDamage(float DamageAmount);
+	
 	// -------------------------------- Overridden UE Functions -------------------------------------------------
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay();
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
-	
+
+	//*********************************************************************** *** ******************************************************************************
+	//*********************************************************************** public *****************************************************************************
+	//*******************************************************************************************************************************************************
+
 public:
 	AProject_JackOLanternCharacter();
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
@@ -178,38 +184,35 @@ public:
 	//-----------------------------------Blueprint Variables-----------------------------------------------------------
 	UPROPERTY(BlueprintReadOnly)
 	float health;
-	
 	UPROPERTY(BlueprintReadWrite)
 	int selectedWeapon;
+	UPROPERTY(BlueprintReadWrite)
+	bool hasPot;
 	
 	UPROPERTY(BlueprintReadOnly)
 	bool isShooting;
-
-	UPROPERTY(BlueprintReadWrite)
-	bool hasPot;
-
 	UPROPERTY(BlueprintReadOnly)
 	bool isAttacking;
-
 	UPROPERTY(BlueprintReadOnly)
 	bool foundKey;
-	
 	UPROPERTY(BlueprintReadOnly)
 	bool hasKey;
-
 	UPROPERTY(BlueprintReadOnly)
 	bool isDead;
-
 	UPROPERTY(BlueprintReadOnly)
 	bool playAttackAnim;
-
+	
 	//--------------------------------------------Our Variables-------------------------------------------------
-	bool isInteracting;
-	FTimerHandle Timer;
-	float timeOfDeath;
-	float timeSinceDeath;
 	TArray<AActor*> AEnemies;
 	TArray<AEnemy*> Enemies;
+	AEnemy* EnemyToDamage;
+	FTimerHandle Timer;
+
+	bool isInteracting;
+	bool overlappedEnemy;
+	
+	float timeOfDeath;
+	float timeSinceDeath;
 	
 	//------------------------------------------- Our Functions -------------------------------------------------
 	void Print(FString message);

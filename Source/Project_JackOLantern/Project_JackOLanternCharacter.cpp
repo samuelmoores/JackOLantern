@@ -224,7 +224,6 @@ void AProject_JackOLanternCharacter::Tick(float DeltaSeconds)
 		SetIdleState();
 	}
 
-	
 	/*if(isAttacking)
 	{
 		Print("attacking");
@@ -311,9 +310,13 @@ void AProject_JackOLanternCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 		Key = Cast<APickup>(OtherActor);
 	}
 
-	if(OtherActor->ActorHasTag("Enemy") && isAttacking)
+	if(OtherActor->ActorHasTag("Enemy") && isAttacking )
 	{
-		//Print("HitEnemy");
+		EnemyToDamage = Cast<AEnemy>(OtherActor);
+		if(EnemyToDamage)
+		{
+			overlappedEnemy = true;
+		}
 	}
 	
 }
@@ -326,12 +329,22 @@ void AProject_JackOLanternCharacter::NotifyActorEndOverlap(AActor* OtherActor)
 	{
 		foundKey = false;
 	}
+
+	if(OtherActor->ActorHasTag("Enemy"))
+	{
+		overlappedEnemy = false;
+		if(EnemyToDamage)
+		{
+			//EnemyToDamage->damaged = false;
+			overlappedEnemy = true;
+		}
+	}
 	
 }
 
 void AProject_JackOLanternCharacter::Print(FString message)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, message, true);
+	GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Yellow, message, true);
 }
 
 void AProject_JackOLanternCharacter::SetState()
@@ -765,6 +778,14 @@ void AProject_JackOLanternCharacter::EndAttackAnim()
 
 	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 	
+}
+
+void AProject_JackOLanternCharacter::DoDamage(float DamageAmount)
+{
+	if(EnemyToDamage && overlappedEnemy)
+	{
+		EnemyToDamage->Damage(DamageAmount);
+	}
 }
 
 void AProject_JackOLanternCharacter::EndDodge()

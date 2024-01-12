@@ -18,7 +18,7 @@ AEnemy::AEnemy()
 	distanceFromPlayer = 0.0f;
 	health = 1.0f;
 	attacking = false;
-	attack = false;
+	doDamage = false;
 	returningToStart = false;
 	playerOnFirstFloor = true;
 	pursuePlayer = false;
@@ -37,32 +37,21 @@ void AEnemy::BeginPlay()
 void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
 	if(Player)
 	{
-		distanceFromPlayer = FVector::Distance(GetActorLocation(), Player->GetActorLocation());
-		distanceFromStart = FVector::Distance(GetActorLocation(), StartingPosition);
+		LocatePlayer();
 
-		if(Player->GetActorLocation().Z > 300.0f)
-		{
-			playerOnFirstFloor = false;
-		}
-		else
-		{
-			playerOnFirstFloor = true;
-		}
-
-		if(!Player->isDead && playerOnFirstFloor )
+		if(!Player->isDead && playerOnFirstFloor && !damagedAnimPlaying && !attacking)
 		{
 			PursuePlayer();
+			//Print("Pursue");
 		}
-		else 
+		else if(pursuePlayer && !damagedAnimPlaying && !attacking)
 		{
-			if(pursuePlayer)
-			{
-				pursuePlayer = false;
-				timeStopPursue = GetWorld()->GetTimeSeconds();
-				GetWorldTimerManager().SetTimer(Timer, this, &AEnemy::ReturnToStart, GetWorld()->DeltaTimeSeconds, true);
-			}
+			pursuePlayer = false;
+			timeStopPursue = GetWorld()->GetTimeSeconds();
+			GetWorldTimerManager().SetTimer(Timer, this, &AEnemy::ReturnToStart, GetWorld()->DeltaTimeSeconds, true);
 		}
 	}
 }
@@ -72,27 +61,53 @@ void AEnemy::PursuePlayer()
 	pursuePlayer = true;
 	returningToStart = false;
 	
-	if(distanceFromPlayer < 90.0f)
+	if(distanceFromPlayer < 90.0f && !damagedAnimPlaying && !damaged)
 	{
 		attacking = true;
 	}
 	else
 	{
-		if(!attacking)
+		if(!attacking && !damaged)
 		{
 			Move();
 		}
 	}
 }
 
+void AEnemy::Damage(float damageAmount)
+{
+	attacking = false;
+	damaged = true;
+	health -= damageAmount;
+}
+
+void AEnemy::LocatePlayer()
+{
+	distanceFromPlayer = FVector::Distance(GetActorLocation(), Player->GetActorLocation());
+	distanceFromStart = FVector::Distance(GetActorLocation(), StartingPosition);
+
+	if(Player->GetActorLocation().Z > 300.0f)
+	{
+		playerOnFirstFloor = false;
+	}
+	else
+	{
+		playerOnFirstFloor = true;
+	}
+}
+
 void AEnemy::ReturnToStart()
 {
+	Print("Return To Start");
+
 	timeSinceStopPursue = GetWorld()->GetTimeSeconds() - timeStopPursue;
 
 	if(timeSinceStopPursue > 3.0f )
 	{
 		returningToStart = true;
+		
 		Move();
+		
 		if(distanceFromStart < 10.0f)
 		{
 			GetWorldTimerManager().ClearTimer(Timer);
@@ -107,6 +122,7 @@ void AEnemy::ReturnToStart()
 
 void AEnemy::Move()
 {
+	Print("Move");
 	if(!returningToStart)
 	{
 		DirectionToMovement = Player->GetActorLocation() - GetActorLocation();
@@ -119,7 +135,7 @@ void AEnemy::Move()
 	DirectionToMovement.Normalize();
 
 	FVector MovementVector = DirectionToMovement ;
-
+	
 	float NewRotationYaw = MovementVector.ToOrientationRotator().Yaw;
 	SetActorRotation(FRotator(0.0f, NewRotationYaw, 0.0f));
 
@@ -131,18 +147,32 @@ void AEnemy::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
 
-	if(OtherActor->ActorHasTag("Player") && attack)
+	if(OtherActor->ActorHasTag("Player"))
 	{
-		if(Player)
-		{
-			Player->health -= 0.10f;
-			if(Player->health <= 0.0f)
-			{
-				Player->Death();
-				attacking = false;
-				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), DeathParticles, GetMesh()->GetComponentLocation(), GetMesh()->GetComponentRotation(), FVector::One(), true);
+		playerOverlapped = true;
+	}
+}
 
-			}
+void AEnemy::NotifyActorEndOverlap(AActor* OtherActor)
+{
+	Super::NotifyActorEndOverlap(OtherActor);
+	if(OtherActor->ActorHasTag("Player"))
+	{
+		playerOverlapped = false;
+	}
+}
+
+void AEnemy::DoDamage(float damageAmount)
+{
+	if(Player && playerOverlapped)
+	{
+		Player->health -= 0.10f;
+		if(Player->health <= 0.0f)
+		{
+			Player->Death();
+			attacking = false;
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), DeathParticles, GetMesh()->GetComponentLocation(), GetMesh()->GetComponentRotation(), FVector::One(), true);
+
 		}
 	}
 }
@@ -154,7 +184,7 @@ void AEnemy::SetPlayer(AProject_JackOLanternCharacter* RespawnedPlayer)
 
 void AEnemy::Print(FString message)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, message, true);
+	GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Yellow, message, true);
 }
 
 

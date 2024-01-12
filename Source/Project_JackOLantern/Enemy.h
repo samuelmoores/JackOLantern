@@ -25,20 +25,31 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
 
 public:
-	//-------------------------------------- Blueprint --------------------------------
+	//-------------------------------------- Blueprint Variables --------------------------------
 	UPROPERTY(BlueprintReadWrite)
-	bool attack;
+	bool doDamage;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool damaged;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool damagedAnimPlaying;
 
 	UPROPERTY(BlueprintReadOnly)
 	bool returningToStart;
-	
+
+	//-------------------------------------- Blueprint Functions --------------------------------
 	UFUNCTION(BlueprintCallable)
 	bool GetAttacking() {return attacking;};
 
 	UFUNCTION(BlueprintCallable)
-	void SetAttacking(bool attackingUpdate) {attacking = attackingUpdate;};
+	void SetAttacking(bool attackingUpdate) {attacking = attackingUpdate; if(attacking){Print("attacking");}};
+
+	UFUNCTION(BlueprintCallable)
+	void DoDamage(float damageAmount);
 
 	//-----------------------------------Variables---------------------------------------------------
 	class AProject_JackOLanternCharacter* Player;
@@ -55,6 +66,7 @@ public:
 	float timeSinceStopPursue;
 	bool playerOnFirstFloor;
 	bool pursuePlayer;
+	bool playerOverlapped;
 
 	//--------------------------------Functions------------------------------------------------------
 	void Print(FString message);
@@ -62,5 +74,7 @@ public:
 	void Move();
 	void ReturnToStart();
 	void PursuePlayer();
+	void Damage(float damageAmount);
+	void LocatePlayer();
 
 };
