@@ -1,5 +1,4 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
-
 #include "Project_JackOLanternCharacter.h"
 #include "Engine/LocalPlayer.h"
 #include "Camera/CameraComponent.h"
@@ -224,13 +223,13 @@ void AProject_JackOLanternCharacter::Tick(float DeltaSeconds)
 		SetIdleState();
 	}
 
-	/*if(isAttacking)
+	/*if(hasPot)
 	{
-		Print("attacking");
+		Print("hasPot");
 	}
 	else
 	{
-		Print("not attacking");
+		Print("not hasPot");
 	}*/
 
 	 /*switch (PlayerStateMovement)
@@ -614,7 +613,7 @@ void AProject_JackOLanternCharacter::Dodge(const FInputActionValue& Value)
 
 void AProject_JackOLanternCharacter::Attack(const FInputActionValue& Value)
 {
-	if(!isAttacking && GetCharacterMovement()->Velocity.Z == 0.0f)
+	if(!isAttacking && GetCharacterMovement()->Velocity.Z == 0.0f && !hasPot)
 	{
 		isAttacking = true;
 		playAttackAnim = true;
@@ -622,8 +621,12 @@ void AProject_JackOLanternCharacter::Attack(const FInputActionValue& Value)
 		{
 			GetCharacterMovement()->DisableMovement();
 		}
+	}else if(hasPot)
+	{
+		hasPot = false;
+		PlayerStateAttacking = THROWING_POT;
 	}
-	
+
 }
 
 void AProject_JackOLanternCharacter::AimStart(const FInputActionValue& Value)
@@ -758,17 +761,13 @@ void AProject_JackOLanternCharacter::ReloadStop()
 
 void AProject_JackOLanternCharacter::ThrowPot()
 {
-	if(Pot && isAttacking)
-	{
-		Pot->Throw();
-	}
+	Pot->Throw();
 }
 
 void AProject_JackOLanternCharacter::EndThrowPot()
 {
 	hasPot = false;
 	PlayerStateAttacking = NOTATTACKING;
-
 }
 
 void AProject_JackOLanternCharacter::EndAttackAnim()

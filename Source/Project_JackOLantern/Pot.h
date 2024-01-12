@@ -20,37 +20,39 @@ class PROJECT_JACKOLANTERN_API APot : public AActor
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UBoxComponent* BoxCollider;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UNiagaraSystem* Explosion;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<AActor> Meshes_Broken;
 
 public:
 	// Sets default values for this character's properties
-	APot();
 	AProject_JackOLanternCharacter* Player;
-
 	UStaticMeshComponent* GetMesh() {return Mesh;}
-
 	FVector OriginalLoc;
-
+	FTimerHandle Timer;
 	bool playerFound;
 	bool hasBeenThrown;
 	bool freakout;
+	bool shattered;
+	float timeOfShatter;
+	float timeSinceShatter;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
 	void Print(FString message);
 
-
 public:	
-	// Called every frame
+	APot();
 	virtual void Tick(float DeltaTime) override;
-
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
-	
+	virtual void NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
 	void Throw();
+	void Shatter();
+	void DestoryAfterTime();
 
 };

@@ -20,7 +20,7 @@ UENUM(BlueprintType)
 enum MovementState { IDLE, RUNNING, JUMPING, DODGING, HURT, CROUCHING, SPRINTING };
 
 UENUM(BlueprintType)
-enum AttackingState { NOTATTACKING, SHOOOTING_PISTOL,SHOOTING_RIFLE, RELOADING_PISTOL,RELOADING_RIFLE, AIMING_PISTOL, AIMING_RIFLE,  MELEE };
+enum AttackingState { NOTATTACKING, PUNCHING, THROWING_POT, SHOOOTING_PISTOL,SHOOTING_RIFLE, RELOADING_PISTOL,RELOADING_RIFLE, AIMING_PISTOL, AIMING_RIFLE};
 
 UENUM(BlueprintType)
 enum WeaponState { UNARMED, HAS_PISTOL, HAS_RIFLE, HAS_MELEEWEAPON };
@@ -188,7 +188,7 @@ public:
 	int selectedWeapon;
 	UPROPERTY(BlueprintReadWrite)
 	bool hasPot;
-	
+
 	UPROPERTY(BlueprintReadOnly)
 	bool isShooting;
 	UPROPERTY(BlueprintReadOnly)
@@ -201,7 +201,7 @@ public:
 	bool isDead;
 	UPROPERTY(BlueprintReadOnly)
 	bool playAttackAnim;
-	
+
 	//--------------------------------------------Our Variables-------------------------------------------------
 	TArray<AActor*> AEnemies;
 	TArray<AEnemy*> Enemies;

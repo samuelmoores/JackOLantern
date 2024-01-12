@@ -1,6 +1,4 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Pot.h"
 #include "Project_JackOLanternCharacter.h"
 #include "NiagaraFunctionLibrary.h"
@@ -17,7 +15,6 @@ APot::APot()
 	BoxCollider = CreateDefaultSubobject<UBoxComponent>("BoxCollider");
 	BoxCollider->SetupAttachment(Mesh);
 
-
 }
 
 // Called when the game starts or when spawned
@@ -28,12 +25,6 @@ void APot::BeginPlay()
 	playerFound = false;
 	BoxCollider->AttachToComponent(Mesh, FAttachmentTransformRules::KeepRelativeTransform);
 	hasBeenThrown = false;
-
-}
-
-void APot::Print(FString message)
-{
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, message, true);
 
 }
 
@@ -75,6 +66,16 @@ void APot::NotifyActorEndOverlap(AActor* OtherActor)
 
 }
 
+void APot::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, bool bSelfMoved,
+	FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
+{
+	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
+	if(Other->ActorHasTag("Level") && !shattered)
+	{
+		Shatter();
+	}
+}
+
 void APot::Throw()
 {
 	Mesh->SetSimulatePhysics(true);
@@ -94,4 +95,36 @@ void APot::Throw()
 	Player->isAttacking = false;
 
 }
+
+void APot::Shatter()
+{
+	shattered = true;
+	FActorSpawnParameters spawnParams;
+	Mesh->SetVisibility(false);
+	BoxCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	GetWorld()->SpawnActor<AActor>(Meshes_Broken, GetActorLocation(), GetActorRotation(), spawnParams);
+
+	timeOfShatter = GetWorld()->TimeSeconds;
+	GetWorldTimerManager().SetTimer(Timer, this, &APot::DestoryAfterTime, GetWorld()->DeltaTimeSeconds, true);
+
+}
+
+void APot::DestoryAfterTime()
+{
+	timeSinceShatter = GetWorld()->TimeSeconds - timeOfShatter;
+	if(timeSinceShatter > 10.0f)
+	{
+		Destroy();
+	}
+	
+}
+
+
+void APot::Print(FString message)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, message, true);
+
+}
+
 
