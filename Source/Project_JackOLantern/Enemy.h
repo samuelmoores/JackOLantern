@@ -41,6 +41,9 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	bool returningToStart;
 
+	UPROPERTY(BlueprintReadWrite)
+	bool dead;
+
 	//-------------------------------------- Blueprint Functions --------------------------------
 	UFUNCTION(BlueprintCallable)
 	bool GetAttacking() {return attacking;};
@@ -57,13 +60,15 @@ public:
 	FVector StartingPosition;
 	FRotator StartingRotation;
 	FVector DirectionToMovement;
+	
 	float health;
 	float distanceFromPlayer;
 	float distanceFromStart;
-	bool playerFound;
-	bool attacking;
 	float timeStopPursue;
 	float timeSinceStopPursue;
+	
+	bool playerFound;
+	bool attacking;
 	bool playerOnFirstFloor;
 	bool pursuePlayer;
 	bool playerOverlapped;

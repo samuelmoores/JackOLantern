@@ -31,6 +31,7 @@ void AEnemy::BeginPlay()
 	Super::BeginPlay();
 	StartingPosition = GetActorLocation();
 	StartingRotation = GetActorRotation();
+	dead = false;
 }
 
 // Called every frame
@@ -38,7 +39,7 @@ void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if(Player)
+	if(Player && !dead)
 	{
 		LocatePlayer();
 
@@ -53,6 +54,41 @@ void AEnemy::Tick(float DeltaTime)
 			timeStopPursue = GetWorld()->GetTimeSeconds();
 			GetWorldTimerManager().SetTimer(Timer, this, &AEnemy::ReturnToStart, GetWorld()->DeltaTimeSeconds, true);
 		}
+	}
+	
+}
+
+void AEnemy::NotifyActorBeginOverlap(AActor* OtherActor)
+{
+	Super::NotifyActorBeginOverlap(OtherActor);
+
+	if(OtherActor->ActorHasTag("Player"))
+	{
+		playerOverlapped = true;
+	}
+}
+
+void AEnemy::NotifyActorEndOverlap(AActor* OtherActor)
+{
+	Super::NotifyActorEndOverlap(OtherActor);
+	if(OtherActor->ActorHasTag("Player"))
+	{
+		playerOverlapped = false;
+	}
+}
+
+void AEnemy::LocatePlayer()
+{
+	distanceFromPlayer = FVector::Distance(GetActorLocation(), Player->GetActorLocation());
+	distanceFromStart = FVector::Distance(GetActorLocation(), StartingPosition);
+
+	if(Player->GetActorLocation().Z > 300.0f)
+	{
+		playerOnFirstFloor = false;
+	}
+	else
+	{
+		playerOnFirstFloor = true;
 	}
 }
 
@@ -74,32 +110,8 @@ void AEnemy::PursuePlayer()
 	}
 }
 
-void AEnemy::Damage(float damageAmount)
-{
-	attacking = false;
-	damaged = true;
-	health -= damageAmount;
-}
-
-void AEnemy::LocatePlayer()
-{
-	distanceFromPlayer = FVector::Distance(GetActorLocation(), Player->GetActorLocation());
-	distanceFromStart = FVector::Distance(GetActorLocation(), StartingPosition);
-
-	if(Player->GetActorLocation().Z > 300.0f)
-	{
-		playerOnFirstFloor = false;
-	}
-	else
-	{
-		playerOnFirstFloor = true;
-	}
-}
-
 void AEnemy::ReturnToStart()
 {
-	Print("Return To Start");
-
 	timeSinceStopPursue = GetWorld()->GetTimeSeconds() - timeStopPursue;
 
 	if(timeSinceStopPursue > 3.0f )
@@ -122,7 +134,6 @@ void AEnemy::ReturnToStart()
 
 void AEnemy::Move()
 {
-	Print("Move");
 	if(!returningToStart)
 	{
 		DirectionToMovement = Player->GetActorLocation() - GetActorLocation();
@@ -143,23 +154,16 @@ void AEnemy::Move()
 	
 }
 
-void AEnemy::NotifyActorBeginOverlap(AActor* OtherActor)
+void AEnemy::Damage(float damageAmount)
 {
-	Super::NotifyActorBeginOverlap(OtherActor);
-
-	if(OtherActor->ActorHasTag("Player"))
+	attacking = false;
+	damaged = true;
+	health -= damageAmount;
+	if(health <= 0.0f)
 	{
-		playerOverlapped = true;
+		dead = true;
 	}
-}
-
-void AEnemy::NotifyActorEndOverlap(AActor* OtherActor)
-{
-	Super::NotifyActorEndOverlap(OtherActor);
-	if(OtherActor->ActorHasTag("Player"))
-	{
-		playerOverlapped = false;
-	}
+	
 }
 
 void AEnemy::DoDamage(float damageAmount)
