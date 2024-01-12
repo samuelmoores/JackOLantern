@@ -33,6 +33,7 @@ public:
 	UStaticMeshComponent* GetMesh() {return Mesh;}
 	FVector OriginalLoc;
 	FTimerHandle Timer;
+	AActor* Meshes_Broken_Spawned;
 	bool playerFound;
 	bool hasBeenThrown;
 	bool freakout;
@@ -53,6 +54,5 @@ public:
 	virtual void NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
 	void Throw();
 	void Shatter();
-	void DestoryAfterTime();
 
 };

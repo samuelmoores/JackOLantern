@@ -103,23 +103,9 @@ void APot::Shatter()
 	Mesh->SetVisibility(false);
 	BoxCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	GetWorld()->SpawnActor<AActor>(Meshes_Broken, GetActorLocation(), GetActorRotation(), spawnParams);
-
-	timeOfShatter = GetWorld()->TimeSeconds;
-	GetWorldTimerManager().SetTimer(Timer, this, &APot::DestoryAfterTime, GetWorld()->DeltaTimeSeconds, true);
-
+	Meshes_Broken_Spawned = GetWorld()->SpawnActor<AActor>(Meshes_Broken, GetActorLocation(), GetActorRotation(), spawnParams);
+	Destroy();
 }
-
-void APot::DestoryAfterTime()
-{
-	timeSinceShatter = GetWorld()->TimeSeconds - timeOfShatter;
-	if(timeSinceShatter > 10.0f)
-	{
-		Destroy();
-	}
-	
-}
-
 
 void APot::Print(FString message)
 {
