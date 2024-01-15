@@ -5,6 +5,7 @@
 #include "Pot.h"
 #include "Project_JackOLanternCharacter.h" 
 #include "NiagaraFunctionLibrary.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
@@ -65,16 +66,6 @@ void AEnemy::NotifyActorBeginOverlap(AActor* OtherActor)
 	if(OtherActor->ActorHasTag("Player"))
 	{
 		playerOverlapped = true;
-	}
-
-	if(OtherActor->ActorHasTag("Pot"))
-	{
-		APot* Pot = Cast<APot>(OtherActor);
-		
-		if(Pot && !dead)
-		{
-			dead = Pot->hasBeenThrown;
-		}
 	}
 }
 
@@ -172,6 +163,7 @@ void AEnemy::Damage(float damageAmount)
 	if(health <= 0.0f)
 	{
 		dead = true;
+		//GetCapsuleComponent()->SetCollisionEnabled((ECollisionEnabled::NoCollisio));
 	}
 	
 }
@@ -186,7 +178,7 @@ void AEnemy::DoDamage(float damageAmount)
 			Player->Death();
 			attacking = false;
 			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), DeathParticles, GetMesh()->GetComponentLocation(), GetMesh()->GetComponentRotation(), FVector::One(), true);
-
+			
 		}
 	}
 }

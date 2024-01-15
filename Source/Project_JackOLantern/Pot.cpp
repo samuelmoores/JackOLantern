@@ -1,5 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "Pot.h"
+#include "Enemy.h"
 #include "Project_JackOLanternCharacter.h"
 #include "NiagaraFunctionLibrary.h"
 
@@ -33,7 +34,6 @@ void APot::BeginPlay()
 void APot::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 	
 }
 
@@ -47,15 +47,7 @@ void APot::NotifyActorBeginOverlap(AActor* OtherActor)
 		{
 			Player  = Cast<AProject_JackOLanternCharacter>(OtherActor);
 		}
-		
-		
 	}
-
-	if(OtherActor->ActorHasTag("Enemy"))
-	{
-		//UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(),Explosion, Mesh->GetComponentLocation(),FRotator::ZeroRotator, FVector::One(), true);
-	}
-
 }
 
 void APot::NotifyActorEndOverlap(AActor* OtherActor)
@@ -68,12 +60,16 @@ void APot::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveCompo
 	FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
 {
 	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
+	const bool bHitLevel = Other->ActorHasTag("Level");
+	const bool bHitEnemy = Other->ActorHasTag("Enemy"); 
 	
-	if((Other->ActorHasTag("Level") || Other->ActorHasTag("Enemy")) && !shattered && hasBeenThrown)
+	if((bHitLevel || bHitEnemy) && !shattered && hasBeenThrown)
 	{
 		hasBeenThrown = false;
-		if(Other->ActorHasTag("Enemy"))
+		if(bHitEnemy)
 		{
+			AEnemy* Enemy = Cast<AEnemy>(Other);
+			Enemy->dead = true;
 			killedEnemy = true;
 		}
 		Shatter();
@@ -124,6 +120,7 @@ void APot::Shatter()
 
 	if(!killedEnemy)
 	{
+		Print("enemy alive");
 		Meshes_Broken_Spawned = GetWorld()->SpawnActor<AActor>(Meshes_Broken, GetActorLocation(), GetActorRotation(), spawnParams);
 
 		timeOfShatter = GetWorld()->TimeSeconds;
@@ -131,6 +128,8 @@ void APot::Shatter()
 	}
 	else
 	{
+		Print("enemy dead");
+
 		Meshes_Broken_Spawned_ShatterOnly = GetWorld()->SpawnActor<AActor>(Meshes_Broken_ShatterOnly, GetActorLocation(), GetActorRotation(), spawnParams);
 	}
 }
@@ -138,12 +137,14 @@ void APot::Shatter()
 void APot::UnShatter()
 {
 	timeSinceShatter = GetWorld()->TimeSeconds - timeOfShatter;
-	if(timeSinceShatter > 5.0)
+	if(timeSinceShatter > 3.0f)
 	{
 		Mesh->SetVisibility(true);
 		BoxCollider->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		shattered = false;
 		playerFound = false;
+		Meshes_Broken_Spawned->Destroy();
+		GetWorldTimerManager().ClearTimer(Timer);
 	}
 }
 
