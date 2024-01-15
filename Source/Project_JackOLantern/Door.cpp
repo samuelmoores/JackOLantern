@@ -35,18 +35,11 @@ void ADoor::Open()
 
 void ADoor::Rotate()
 {
-	if(Mesh->GetComponentRotation().Yaw < -85.0f && Mesh->GetComponentRotation().Yaw > -180.0f)
+	if(Mesh->GetComponentRotation().Yaw <= 0.0f && Mesh->GetComponentRotation().Yaw > -125)
 	{
-		float newYaw = Mesh->GetComponentRotation().Yaw - 2;
+		float newYaw = Mesh->GetComponentRotation().Yaw - GetWorld()->DeltaTimeSeconds*(60.0f);
 		Mesh->SetWorldRotation(FRotator(0.0f, newYaw, 0.0f));
 	}
-
-	if(Mesh->GetComponentRotation().Yaw < 180.0f && Mesh->GetComponentRotation().Yaw > 120.0f)
-	{
-		float newYaw = Mesh->GetComponentRotation().Yaw - 2;
-		Mesh->SetWorldRotation(FRotator(0.0f, newYaw, 0.0f));
-	}
-	
 }
 
 // Called when the game starts or when spawned
@@ -84,17 +77,6 @@ void ADoor::NotifyActorEndOverlap(AActor* OtherActor)
 void ADoor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if(playerFound)
-	{
-		if(player)
-		{
-			if(player->isInteracting && !isOpen)
-			{
-				Open();
-			}
-		}
-	}
 
 }
 

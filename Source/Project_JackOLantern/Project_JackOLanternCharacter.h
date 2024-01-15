@@ -100,6 +100,7 @@ class AProject_JackOLanternCharacter : public ACharacter
 
 	class APot* Pot;
 	class APickup* Key;
+	class ADoor* Door;
 
 	//movement
 	float runSpeed;
@@ -129,7 +130,6 @@ protected:
 	void CrouchStop(const FInputActionValue& Value);
 	void Dodge(const FInputActionValue& Value);
 	void Attack(const FInputActionValue& Value);
-	void EndAttack(const FInputActionValue& Value);
 	void AimStart(const FInputActionValue& Value);
 	void AimStop(const FInputActionValue& Value);
 	void ChangeWeapon(const FInputActionValue& Value);
@@ -137,7 +137,6 @@ protected:
 	void ReloadStart(const FInputActionValue& Value);
 	void InteractStart(const FInputActionValue& Value);
 	void InteractStop(const FInputActionValue& Value);
-	void Throw();
 
 	//--------------------------------------Respawning-----------------------------------------------------------
 	virtual void Destroyed() override;
@@ -195,6 +194,10 @@ public:
 	bool isAttacking;
 	UPROPERTY(BlueprintReadOnly)
 	bool foundKey;
+	UPROPERTY(BlueprintReadOnly)
+	bool foundDoor;
+	UPROPERTY(BlueprintReadOnly)
+	bool foundPot;
 	UPROPERTY(BlueprintReadOnly)
 	bool hasKey;
 	UPROPERTY(BlueprintReadOnly)
