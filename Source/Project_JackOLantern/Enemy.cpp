@@ -2,6 +2,7 @@
 
 
 #include "Enemy.h"
+#include "Pot.h"
 #include "Project_JackOLanternCharacter.h" 
 #include "NiagaraFunctionLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -55,7 +56,6 @@ void AEnemy::Tick(float DeltaTime)
 			GetWorldTimerManager().SetTimer(Timer, this, &AEnemy::ReturnToStart, GetWorld()->DeltaTimeSeconds, true);
 		}
 	}
-	
 }
 
 void AEnemy::NotifyActorBeginOverlap(AActor* OtherActor)
@@ -65,6 +65,16 @@ void AEnemy::NotifyActorBeginOverlap(AActor* OtherActor)
 	if(OtherActor->ActorHasTag("Player"))
 	{
 		playerOverlapped = true;
+	}
+
+	if(OtherActor->ActorHasTag("Pot"))
+	{
+		APot* Pot = Cast<APot>(OtherActor);
+		
+		if(Pot && !dead)
+		{
+			dead = Pot->hasBeenThrown;
+		}
 	}
 }
 

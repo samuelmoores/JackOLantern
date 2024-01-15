@@ -27,6 +27,9 @@ class PROJECT_JACKOLANTERN_API APot : public AActor
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<AActor> Meshes_Broken;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<AActor> Meshes_Broken_ShatterOnly;
+
 public:
 	// Sets default values for this character's properties
 	AProject_JackOLanternCharacter* Player;
@@ -34,12 +37,15 @@ public:
 	FVector OriginalLoc;
 	FTimerHandle Timer;
 	AActor* Meshes_Broken_Spawned;
+	AActor* Meshes_Broken_Spawned_ShatterOnly;
+
 	bool playerFound;
 	bool hasBeenThrown;
 	bool freakout;
 	bool shattered;
 	float timeOfShatter;
 	float timeSinceShatter;
+	bool killedEnemy;
 
 protected:
 	// Called when the game starts or when spawned

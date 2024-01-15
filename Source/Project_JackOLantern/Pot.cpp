@@ -25,6 +25,7 @@ void APot::BeginPlay()
 	playerFound = false;
 	BoxCollider->AttachToComponent(Mesh, FAttachmentTransformRules::KeepRelativeTransform);
 	hasBeenThrown = false;
+	killedEnemy = false;
 
 }
 
@@ -33,6 +34,7 @@ void APot::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	
 }
 
 void APot::NotifyActorBeginOverlap(AActor* OtherActor)
@@ -51,7 +53,7 @@ void APot::NotifyActorBeginOverlap(AActor* OtherActor)
 
 	if(OtherActor->ActorHasTag("Enemy"))
 	{
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(),Explosion, Mesh->GetComponentLocation(),FRotator::ZeroRotator, FVector::One(), true);
+		//UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(),Explosion, Mesh->GetComponentLocation(),FRotator::ZeroRotator, FVector::One(), true);
 	}
 
 }
@@ -67,8 +69,13 @@ void APot::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveCompo
 {
 	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
 	
-	if(Other->ActorHasTag("Level") && !shattered)
+	if((Other->ActorHasTag("Level") || Other->ActorHasTag("Enemy")) && !shattered && hasBeenThrown)
 	{
+		hasBeenThrown = false;
+		if(Other->ActorHasTag("Enemy"))
+		{
+			killedEnemy = true;
+		}
 		Shatter();
 	}
 }
@@ -95,7 +102,7 @@ void APot::Throw()
 
 	FVector ImpulseVector = Mesh->GetComponentTransform().GetUnitAxis(EAxis::Z);
 	
-	ImpulseVector *= 200.0f;
+	ImpulseVector *= 400.0f;
 
 	if(Player->GetVelocity().Length() != 0.0f)
 	{
@@ -115,11 +122,17 @@ void APot::Shatter()
 	BoxCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Mesh->SetSimulatePhysics(false);
 
-	Meshes_Broken_Spawned = GetWorld()->SpawnActor<AActor>(Meshes_Broken, GetActorLocation(), GetActorRotation(), spawnParams);
-	
-	timeOfShatter = GetWorld()->TimeSeconds;
-	GetWorldTimerManager().SetTimer(Timer, this, &APot::UnShatter, GetWorld()->DeltaTimeSeconds, true);
-	
+	if(!killedEnemy)
+	{
+		Meshes_Broken_Spawned = GetWorld()->SpawnActor<AActor>(Meshes_Broken, GetActorLocation(), GetActorRotation(), spawnParams);
+
+		timeOfShatter = GetWorld()->TimeSeconds;
+		GetWorldTimerManager().SetTimer(Timer, this, &APot::UnShatter, GetWorld()->DeltaTimeSeconds, true);
+	}
+	else
+	{
+		Meshes_Broken_Spawned_ShatterOnly = GetWorld()->SpawnActor<AActor>(Meshes_Broken_ShatterOnly, GetActorLocation(), GetActorRotation(), spawnParams);
+	}
 }
 
 void APot::UnShatter()
@@ -131,8 +144,6 @@ void APot::UnShatter()
 		BoxCollider->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		shattered = false;
 		playerFound = false;
-		hasBeenThrown = false;
-		
 	}
 }
 
