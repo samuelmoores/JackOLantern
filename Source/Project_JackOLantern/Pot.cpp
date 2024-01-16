@@ -120,7 +120,6 @@ void APot::Shatter()
 
 	if(!killedEnemy)
 	{
-		Print("enemy alive");
 		Meshes_Broken_Spawned = GetWorld()->SpawnActor<AActor>(Meshes_Broken, GetActorLocation(), GetActorRotation(), spawnParams);
 
 		timeOfShatter = GetWorld()->TimeSeconds;
@@ -128,7 +127,6 @@ void APot::Shatter()
 	}
 	else
 	{
-		Print("enemy dead");
 
 		Meshes_Broken_Spawned_ShatterOnly = GetWorld()->SpawnActor<AActor>(Meshes_Broken_ShatterOnly, GetActorLocation(), GetActorRotation(), spawnParams);
 	}

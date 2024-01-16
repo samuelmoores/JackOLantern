@@ -140,7 +140,7 @@ void AProject_JackOLanternCharacter::Tick(float DeltaSeconds)
 	{
 		SetIdleState();
 	}
-
+	
 	/*if(hasPot)
 	{
 		Print("hasPot");
@@ -406,8 +406,8 @@ void AProject_JackOLanternCharacter::CrouchStart(const FInputActionValue& Value)
 	if(!isSprinting && !GetCharacterMovement()->IsFalling() && !isReloading)
 	{
 		PlayerStateMovement = CROUCHING;
+		Crouch();
 		isCrouching = true;
-		GetCharacterMovement()->MaxWalkSpeed = crouchSpeed;
 	}
 }
 
@@ -415,9 +415,11 @@ void AProject_JackOLanternCharacter::CrouchStop(const FInputActionValue& Value)
 {
 	if(!isSprinting && !GetCharacterMovement()->IsFalling())
 	{
+		UnCrouch();
 		isCrouching = false;
-		GetCharacterMovement()->MaxWalkSpeed = runSpeed;
 		PlayerStateMovement = IDLE;
+		//GetCharacterMovement()->bWantsToCrouch = false;
+
 	}
 }
 
@@ -442,7 +444,7 @@ void AProject_JackOLanternCharacter::InteractStart(const FInputActionValue& Valu
 		}
 	}
 
-	if(foundDoor && Door)
+	if(foundDoor && Door && hasKey)
 	{
 		Door->Open();
 	}

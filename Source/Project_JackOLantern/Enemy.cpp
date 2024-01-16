@@ -48,7 +48,6 @@ void AEnemy::Tick(float DeltaTime)
 		if(!Player->isDead && playerOnFirstFloor && !damagedAnimPlaying && !attacking)
 		{
 			PursuePlayer();
-			//Print("Pursue");
 		}
 		else if(pursuePlayer && !damagedAnimPlaying && !attacking)
 		{
@@ -163,7 +162,7 @@ void AEnemy::Damage(float damageAmount)
 	if(health <= 0.0f)
 	{
 		dead = true;
-		//GetCapsuleComponent()->SetCollisionEnabled((ECollisionEnabled::NoCollisio));
+		GetCapsuleComponent()->SetCollisionEnabled((ECollisionEnabled::NoCollision));
 	}
 	
 }

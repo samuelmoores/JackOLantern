@@ -22,7 +22,7 @@ ADoor::ADoor()
 	isOpen = false;
 	playerFound = false;
 	openStartTime = 0.0f;
-	rotateSpeed = 50.0f;
+	rotateSpeed = 100.0f;
 	player = nullptr;
 }
 
@@ -37,7 +37,7 @@ void ADoor::Rotate()
 {
 	if(Mesh->GetComponentRotation().Yaw <= 0.0f && Mesh->GetComponentRotation().Yaw > -125)
 	{
-		float newYaw = Mesh->GetComponentRotation().Yaw - GetWorld()->DeltaTimeSeconds*(60.0f);
+		float newYaw = Mesh->GetComponentRotation().Yaw - GetWorld()->DeltaTimeSeconds*(rotateSpeed);
 		Mesh->SetWorldRotation(FRotator(0.0f, newYaw, 0.0f));
 	}
 }
