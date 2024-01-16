@@ -112,6 +112,8 @@ void AProject_JackOLanternCharacter::BeginPlay()
 	hasKey = false;
 	foundDoor = false;
 	foundPot = false;
+	underTable = false;
+
 
 	//States
 	PlayerStateMovement = IDLE;
@@ -242,6 +244,11 @@ void AProject_JackOLanternCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 		Door = Cast<ADoor>(OtherActor);
 		foundDoor = true;
 	}
+
+	if(OtherActor->ActorHasTag("Table"))
+	{
+		underTable = true;
+	}
 	
 }
 
@@ -274,6 +281,11 @@ void AProject_JackOLanternCharacter::NotifyActorEndOverlap(AActor* OtherActor)
 	{
 		foundPot = false;
 		Pot = nullptr;
+	}
+
+	if(OtherActor->ActorHasTag("Table"))
+	{
+		underTable = false;
 	}
 	
 }
@@ -407,7 +419,6 @@ void AProject_JackOLanternCharacter::CrouchStart(const FInputActionValue& Value)
 	{
 		PlayerStateMovement = CROUCHING;
 		Crouch();
-		isCrouching = true;
 	}
 }
 
@@ -416,7 +427,6 @@ void AProject_JackOLanternCharacter::CrouchStop(const FInputActionValue& Value)
 	if(!isSprinting && !GetCharacterMovement()->IsFalling())
 	{
 		UnCrouch();
-		isCrouching = false;
 		PlayerStateMovement = IDLE;
 		//GetCharacterMovement()->bWantsToCrouch = false;
 

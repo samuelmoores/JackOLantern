@@ -41,11 +41,11 @@ void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if(Player && !dead)
+	if(Player && !dead && !AI_controlled)
 	{
 		LocatePlayer();
 
-		if(!Player->isDead && playerOnFirstFloor && !damagedAnimPlaying && !attacking)
+		if(!Player->isDead && playerOnFirstFloor && !damagedAnimPlaying && !attacking && !Player->underTable)
 		{
 			PursuePlayer();
 		}
@@ -147,8 +147,11 @@ void AEnemy::Move()
 
 	FVector MovementVector = DirectionToMovement ;
 	
-	float NewRotationYaw = MovementVector.ToOrientationRotator().Yaw;
-	SetActorRotation(FRotator(0.0f, NewRotationYaw, 0.0f));
+	FRotator TargetRotation = MovementVector.ToOrientationRotator();
+
+	FRotator NewRotation = FMath::RInterpTo(GetActorRotation(), TargetRotation, GetWorld()->DeltaTimeSeconds, 3.0f);
+	
+	SetActorRotation(NewRotation);
 
 	GetCharacterMovement()->AddInputVector(MovementVector);
 	
@@ -162,6 +165,7 @@ void AEnemy::Damage(float damageAmount)
 	if(health <= 0.0f)
 	{
 		dead = true;
+		GetCharacterMovement()->DisableMovement();
 		GetCapsuleComponent()->SetCollisionEnabled((ECollisionEnabled::NoCollision));
 	}
 	
@@ -189,7 +193,7 @@ void AEnemy::SetPlayer(AProject_JackOLanternCharacter* RespawnedPlayer)
 
 void AEnemy::Print(FString message)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Yellow, message, true);
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, message, true);
 }
 
 

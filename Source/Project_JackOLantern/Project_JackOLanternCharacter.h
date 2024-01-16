@@ -213,6 +213,8 @@ public:
 
 	bool isInteracting;
 	bool overlappedEnemy;
+	bool underTable;
+
 	
 	float timeOfDeath;
 	float timeSinceDeath;
