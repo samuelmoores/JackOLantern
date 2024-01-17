@@ -143,15 +143,6 @@ void AProject_JackOLanternCharacter::Tick(float DeltaSeconds)
 	{
 		SetIdleState();
 	}
-
-	if(hasBallroomKey)
-	{
-		Print("has ballroom key");
-	}
-	else
-	{
-		Print("not has ballroom key");
-	}
 	
 	/*if(hasPot)
 	{
@@ -763,6 +754,7 @@ void AProject_JackOLanternCharacter::DoDamage(float DamageAmount)
 {
 	if(EnemyToDamage && overlappedEnemy)
 	{
+		Print("Damage Enemy");
 		FDamageEvent damageEvent;
 		EnemyToDamage->Damage(DamageAmount);
 		EnemyToDamage->TakeDamage(0.50f, damageEvent, GetController(), this);
