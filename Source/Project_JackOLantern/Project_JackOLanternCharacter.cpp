@@ -89,7 +89,7 @@ void AProject_JackOLanternCharacter::BeginPlay()
 
 	health = 1.0f;
 
-	//Movement
+	//-----------Movement------------------------------------------
 	runSpeed = 500.0f;
 	sprintSpeed = 700.0f;
 	crouchSpeed = 75.0f;
@@ -97,31 +97,33 @@ void AProject_JackOLanternCharacter::BeginPlay()
 	isCrouching = false;
 	isDodging = false;
 
-	//Attacking
+	//---------Attacking---------------------------------------------
 	isAttacking = false;
 	isReloading = false;
 	isShooting = false;
 	isAiming = false;
+	isDead = false;
+
 	hasGun = false;
 	hasPistol = false;
 	hasRifle = false;
-	selectedWeapon = 0;
 	hasPot = false;
-	isDead = false;
 
-	//Interacting
+	foundBat = false;
+	selectedWeapon = 0;
+
+	//--------Interacting-------------------------------
 	hasKey = false;
 	foundDoor = false;
 	foundPot = false;
 	underTable = false;
-
-
-	//States
+	
+	//------------States------------------------------------
 	PlayerStateMovement = IDLE;
 	PlayerStateAttacking = NOTATTACKING;
 	PlayerStateWeapon = UNARMED;
 
-	//Death
+	//-------------Death----------------------------------
 	timeOfDeath = 0.0f;
 	timeSinceDeath = 0.0f;
 	
@@ -200,14 +202,17 @@ void AProject_JackOLanternCharacter::Tick(float DeltaSeconds)
 
 	/*switch(PlayerStateWeapon)
 	{
+	case UNARMED:
+		Print("unarmed");
+		break;
+	case HAS_MELEEWEAPON:
+		Print("Has Melee");
+		break;
 	case HAS_PISTOL:
 		Print("Has Pistol");
 		break;
 	case HAS_RIFLE:
 		Print("Has Rifle");
-		break;
-	case HAS_MELEEWEAPON:
-		Print("Has Melee Weapon");
 		break;
 	default:
 		Print("no weapon state");
@@ -250,7 +255,7 @@ void AProject_JackOLanternCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 	{
 		underTable = true;
 	}
-	
+
 }
 
 void AProject_JackOLanternCharacter::NotifyActorEndOverlap(AActor* OtherActor)
@@ -293,7 +298,7 @@ void AProject_JackOLanternCharacter::NotifyActorEndOverlap(AActor* OtherActor)
 
 void AProject_JackOLanternCharacter::Print(FString message)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Yellow, message, true);
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, message, true);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -472,6 +477,7 @@ void AProject_JackOLanternCharacter::InteractStart(const FInputActionValue& Valu
 		Pot->Pickup();
 		foundPot = false;
 	}
+
 }
 
 void AProject_JackOLanternCharacter::InteractStop(const FInputActionValue& Value)
@@ -571,18 +577,22 @@ void AProject_JackOLanternCharacter::ReloadStart(const FInputActionValue& Value)
 
 void AProject_JackOLanternCharacter::ChangeWeapon(const FInputActionValue& Value)
 {
+	//Print("Change Weapon");
+	//Print(FString::SanitizeFloat(selectedWeapon));
+	
 	switch(selectedWeapon)
 	{
 	case 0:
 		PlayerStateWeapon = UNARMED;
+		break;
 	case 1:
 		PlayerStateWeapon = HAS_MELEEWEAPON;
 		break;
 	case 2:
-		//PlayerStateWeapon = HAS_PISTOL;
+		PlayerStateWeapon = HAS_PISTOL;
 		break;
 	case 3:
-		//PlayerStateWeapon = HAS_RIFLE;
+		PlayerStateWeapon = HAS_RIFLE;
 		break;
 	default:
 		PlayerStateWeapon = UNARMED;
@@ -767,6 +777,11 @@ void AProject_JackOLanternCharacter::Death()
 	GetCharacterMovement()->DisableMovement();
 	timeOfDeath = GetWorld()->GetTimeSeconds();
 	GetWorldTimerManager().SetTimer(Timer,this, &AProject_JackOLanternCharacter::Respawn, GetWorld()->DeltaTimeSeconds, true);
+}
+
+void AProject_JackOLanternCharacter::SetWeaponState(WeaponState PlayerWeaponState)
+{
+	this->PlayerStateWeapon = PlayerWeaponState;
 }
 
 

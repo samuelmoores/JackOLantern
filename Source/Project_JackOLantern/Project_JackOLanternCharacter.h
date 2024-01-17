@@ -118,6 +118,7 @@ class AProject_JackOLanternCharacter : public ACharacter
 	bool hasRifle;
 	bool isAiming;
 	bool isReloading;
+	bool foundBat;
 
 protected:
 	// ------------------------------------ Actions -------------------------------------------------------------
@@ -187,7 +188,6 @@ public:
 	int selectedWeapon;
 	UPROPERTY(BlueprintReadWrite)
 	bool hasPot;
-
 	UPROPERTY(BlueprintReadOnly)
 	bool isShooting;
 	UPROPERTY(BlueprintReadOnly)
@@ -215,10 +215,10 @@ public:
 
 	bool isInteracting;
 	bool overlappedEnemy;
+	bool hasBallroomKey;
+
 	float timeOfDeath;
 	float timeSinceDeath;
-
-	bool hasBallroomKey;
 	
 	//------------------------------------------- Our Functions -------------------------------------------------
 	void Print(FString message);
@@ -231,6 +231,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	WeaponState GetJackStateWeapon() const {return PlayerStateWeapon;}
+
+	UFUNCTION(BlueprintCallable)
+	void SetWeaponState(WeaponState PlayerWeaponState);
 
 	void SetState();
 	void SetIdleState();
