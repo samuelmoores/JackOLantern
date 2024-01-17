@@ -16,6 +16,7 @@
 #include "Enemy.h"
 #include "Kismet/GameplayStatics.h"
 #include "Project_JackOLanternGameMode.h"
+#include "Engine/DamageEvents.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -141,6 +142,15 @@ void AProject_JackOLanternCharacter::Tick(float DeltaSeconds)
 	if(GetCharacterMovement()->Velocity.IsZero())
 	{
 		SetIdleState();
+	}
+
+	if(hasBallroomKey)
+	{
+		Print("has ballroom key");
+	}
+	else
+	{
+		Print("not has ballroom key");
 	}
 	
 	/*if(hasPot)
@@ -450,13 +460,20 @@ void AProject_JackOLanternCharacter::InteractStart(const FInputActionValue& Valu
 		foundKey = false;
 		if(Key)
 		{
+			if(Key->ActorHasTag("Ballroom"))
+			{
+				hasBallroomKey = true;
+			}
 			Key->Collect();
 		}
 	}
 
-	if(foundDoor && Door && hasKey)
+	if(foundDoor && Door && hasBallroomKey)
 	{
-		Door->Open();
+		if(Door->ActorHasTag("Ballroom"))
+		{
+			Door->Open();
+		}
 	}
 
 	if(foundPot && Pot)
@@ -479,9 +496,9 @@ void AProject_JackOLanternCharacter::Attack(const FInputActionValue& Value)
 	{
 		isAttacking = true;
 		playAttackAnim = true;
-		if(GetVelocity().Length() < 500.0f)
+		if(GetVelocity().Length() < 300.0f)
 		{
-			//GetCharacterMovement()->DisableMovement();
+			GetCharacterMovement()->DisableMovement();
 		}
 	}else if(hasPot)
 	{
@@ -746,7 +763,9 @@ void AProject_JackOLanternCharacter::DoDamage(float DamageAmount)
 {
 	if(EnemyToDamage && overlappedEnemy)
 	{
+		FDamageEvent damageEvent;
 		EnemyToDamage->Damage(DamageAmount);
+		EnemyToDamage->TakeDamage(0.50f, damageEvent, GetController(), this);
 	}
 }
 

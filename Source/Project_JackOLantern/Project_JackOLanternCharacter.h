@@ -215,10 +215,10 @@ public:
 
 	bool isInteracting;
 	bool overlappedEnemy;
-
-	
 	float timeOfDeath;
 	float timeSinceDeath;
+
+	bool hasBallroomKey;
 	
 	//------------------------------------------- Our Functions -------------------------------------------------
 	void Print(FString message);
