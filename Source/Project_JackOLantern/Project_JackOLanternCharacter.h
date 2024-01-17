@@ -204,7 +204,9 @@ public:
 	bool isDead;
 	UPROPERTY(BlueprintReadOnly)
 	bool playAttackAnim;
-
+	UPROPERTY(BlueprintReadOnly)
+	bool underTable;
+	
 	//--------------------------------------------Our Variables-------------------------------------------------
 	TArray<AActor*> AEnemies;
 	TArray<AEnemy*> Enemies;
@@ -213,7 +215,6 @@ public:
 
 	bool isInteracting;
 	bool overlappedEnemy;
-	bool underTable;
 
 	
 	float timeOfDeath;

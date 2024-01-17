@@ -481,7 +481,7 @@ void AProject_JackOLanternCharacter::Attack(const FInputActionValue& Value)
 		playAttackAnim = true;
 		if(GetVelocity().Length() < 500.0f)
 		{
-			GetCharacterMovement()->DisableMovement();
+			//GetCharacterMovement()->DisableMovement();
 		}
 	}else if(hasPot)
 	{
