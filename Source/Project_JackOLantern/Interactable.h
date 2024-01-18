@@ -3,19 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Pickup.h"
-#include "Components/BoxComponent.h"
 #include "GameFramework/Actor.h"
-#include "Weapon.generated.h"
+#include "Interactable.generated.h"
 
 UCLASS()
-class PROJECT_JACKOLANTERN_API AWeapon : public APickup
+class PROJECT_JACKOLANTERN_API AInteractable : public AActor
 {
 	GENERATED_BODY()
-
+	
 public:	
 	// Sets default values for this actor's properties
-	AWeapon();
+	AInteractable();
 
 protected:
 	// Called when the game starts or when spawned
@@ -24,5 +22,6 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	virtual void Interact();
 
 };

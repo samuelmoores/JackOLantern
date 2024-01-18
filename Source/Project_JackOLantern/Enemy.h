@@ -29,18 +29,8 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
-
 public:
 	//-------------------------------------- Blueprint Variables --------------------------------
-	UPROPERTY(BlueprintReadWrite)
-	bool doDamage;
-
-	UPROPERTY(BlueprintReadWrite)
-	bool damaged;
-
-	UPROPERTY(BlueprintReadWrite)
-	bool damagedAnimPlaying;
-
 	UPROPERTY(BlueprintReadOnly)
 	bool returningToStart;
 
@@ -48,14 +38,6 @@ public:
 	bool dead;
 
 	//-------------------------------------- Blueprint Functions --------------------------------
-	UFUNCTION(BlueprintCallable)
-	bool GetAttacking() {return attacking;};
-
-	UFUNCTION(BlueprintCallable)
-	void SetAttacking(bool attackingUpdate) {attacking = attackingUpdate; if(attacking){Print("attacking");}};
-
-	UFUNCTION(BlueprintCallable)
-	void DoDamage(float damageAmount);
 
 	//-----------------------------------Variables---------------------------------------------------
 	class AProject_JackOLanternCharacter* Player;
@@ -63,26 +45,27 @@ public:
 	FVector StartingPosition;
 	FRotator StartingRotation;
 	FVector DirectionToMovement;
-	
-	float health;
+
+	//--------------- movement -----------------------------
 	float distanceFromPlayer;
 	float distanceFromStart;
 	float timeStopPursue;
 	float timeSinceStopPursue;
 	
 	bool playerFound;
-	bool attacking;
 	bool playerOnFirstFloor;
 	bool pursuePlayer;
-	bool playerOverlapped;
 
+	//-------------- attacking -----------------------------------------
+	float health;
+	
 	//--------------------------------Functions------------------------------------------------------
 	void Print(FString message);
 	void SetPlayer(AProject_JackOLanternCharacter* RespawnedPlayer);
 	void Move();
 	void ReturnToStart();
 	void PursuePlayer();
-	void Damage(float damageAmount);
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	void LocatePlayer();
 
 };

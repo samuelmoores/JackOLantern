@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "NiagaraSystem.h"
+#include "Pickup.h"
 #include "GameFramework/Character.h"
 #include "Project_JackOLanternCharacter.h"
 #include "Components/BoxComponent.h"
@@ -11,16 +12,10 @@
 #include "Pot.generated.h"
 
 UCLASS()
-class PROJECT_JACKOLANTERN_API APot : public AActor
+class PROJECT_JACKOLANTERN_API APot : public APickup
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UStaticMeshComponent* Mesh;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UBoxComponent* BoxCollider;
-	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UNiagaraSystem* Explosion;
 	
@@ -33,7 +28,6 @@ class PROJECT_JACKOLANTERN_API APot : public AActor
 public:
 	// Sets default values for this character's properties
 	AProject_JackOLanternCharacter* Player;
-	UStaticMeshComponent* GetMesh() {return Mesh;}
 	FVector OriginalLoc;
 	FTimerHandle Timer;
 	AActor* Meshes_Broken_Spawned;

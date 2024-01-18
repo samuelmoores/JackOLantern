@@ -16,6 +16,7 @@
 #include "Enemy.h"
 #include "Kismet/GameplayStatics.h"
 #include "Project_JackOLanternGameMode.h"
+#include "Weapon.h"
 #include "Engine/DamageEvents.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -59,25 +60,7 @@ AProject_JackOLanternCharacter::AProject_JackOLanternCharacter()
 
 	HitBox = CreateDefaultSubobject<USphereComponent>(TEXT("Hitbox"));
 	HitBox->SetupAttachment(GetMesh(), "middle_r_01_BIND");
-
-	//Set Particle System
-	static ConstructorHelpers::FObjectFinder<UParticleSystem> SparksFinder(TEXT("/Game/StarterContent/Particles/P_Explosion"));
-	if(SparksFinder.Succeeded())
-	{
-		HitParticles = SparksFinder.Object;
-	}
-
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEnemy::StaticClass(), AEnemies);
-
-	for (AActor* Actor : AEnemies)
-	{
-		AEnemy* Enemy = Cast<AEnemy>(Actor);
-		if(Enemy)
-		{
-			Enemy->SetPlayer(this);
-		}
-	}
-
+	
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
@@ -96,19 +79,10 @@ void AProject_JackOLanternCharacter::BeginPlay()
 	isSprinting = false;
 	isCrouching = false;
 	isDodging = false;
+	underTable = false;
 
 	//---------Attacking---------------------------------------------
-	isAttacking = false;
-	isReloading = false;
-	isShooting = false;
-	isAiming = false;
 	isDead = false;
-
-	hasGun = false;
-	hasPistol = false;
-	hasRifle = false;
-	hasPot = false;
-
 	foundBat = false;
 	selectedWeapon = 0;
 
@@ -116,7 +90,7 @@ void AProject_JackOLanternCharacter::BeginPlay()
 	hasKey = false;
 	foundDoor = false;
 	foundPot = false;
-	underTable = false;
+	hasPot = false;
 	
 	//------------States------------------------------------
 	PlayerStateMovement = IDLE;
@@ -145,15 +119,6 @@ void AProject_JackOLanternCharacter::Tick(float DeltaSeconds)
 	{
 		SetIdleState();
 	}
-	
-	/*if(hasPot)
-	{
-		Print("hasPot");
-	}
-	else
-	{
-		Print("not hasPot");
-	}*/
 
 	 /*switch (PlayerStateMovement)
 	 {
@@ -179,8 +144,7 @@ void AProject_JackOLanternCharacter::Tick(float DeltaSeconds)
 	 	Print("no state");
 	 }*/
 
-	/*
-	switch(PlayerStateAttacking)
+	/*switch(PlayerStateAttacking)
 	{
 	case PUNCHING:
 		Print("Punching");
@@ -228,76 +192,12 @@ void AProject_JackOLanternCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
 
-	if(OtherActor->ActorHasTag("Pot") && !hasPot)
-	{
-		foundPot = true;
-		Pot = Cast<APot>(OtherActor);
-	}
-
-	if(OtherActor->ActorHasTag("Key"))
-	{
-		foundKey = true;
-		Key = Cast<APickup>(OtherActor);
-	}
-
-	if(OtherActor->ActorHasTag("Enemy") && isAttacking )
-	{
-		EnemyToDamage = Cast<AEnemy>(OtherActor);
-		if(EnemyToDamage)
-		{
-			overlappedEnemy = true;
-		}
-	}
-
-	if(OtherActor->ActorHasTag("Door"))
-	{
-		Door = Cast<ADoor>(OtherActor);
-		foundDoor = true;
-	}
-
-	if(OtherActor->ActorHasTag("Table"))
-	{
-		underTable = true;
-	}
-
 }
 
 void AProject_JackOLanternCharacter::NotifyActorEndOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorEndOverlap(OtherActor);
 
-	if(OtherActor->ActorHasTag("Key"))
-	{
-		foundKey = false;
-	}
-
-	if(OtherActor->ActorHasTag("Enemy"))
-	{
-		overlappedEnemy = false;
-		if(EnemyToDamage)
-		{
-			//EnemyToDamage->damaged = false;
-			overlappedEnemy = true;
-		}
-	}
-
-	if(OtherActor->ActorHasTag("Door"))
-	{
-		Door = nullptr;
-		foundDoor = false;
-	}
-
-	if(OtherActor->ActorHasTag("Pot") && !hasPot)
-	{
-		foundPot = false;
-		Pot = nullptr;
-	}
-
-	if(OtherActor->ActorHasTag("Table"))
-	{
-		underTable = false;
-	}
-	
 }
 
 void AProject_JackOLanternCharacter::Print(FString message)
@@ -337,20 +237,9 @@ void AProject_JackOLanternCharacter::SetupPlayerInputComponent(UInputComponent* 
 		//Attacking
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::Attack);
 		
-		//Crouching
-		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::AimStart);
-		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &AProject_JackOLanternCharacter::AimStop);
-
 		//Changing Weapon
 		EnhancedInputComponent->BindAction(ChangeWeaponAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::ChangeWeapon);
-
-		//Shooting
-		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::ShootStart);
-		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Completed, this, &AProject_JackOLanternCharacter::ShootStop);
-
-		//Reloading
-		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::ReloadStart);
-
+		
 		//Interacting
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AProject_JackOLanternCharacter::InteractStart);
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &AProject_JackOLanternCharacter::InteractStop);
@@ -425,7 +314,7 @@ void AProject_JackOLanternCharacter::SprintStop(const FInputActionValue& Value)
 
 void AProject_JackOLanternCharacter::CrouchStart(const FInputActionValue& Value)
 {
-	if(!isSprinting && !GetCharacterMovement()->IsFalling() && !isReloading)
+	if(!isSprinting && !GetCharacterMovement()->IsFalling())
 	{
 		PlayerStateMovement = CROUCHING;
 		Crouch();
@@ -453,35 +342,14 @@ void AProject_JackOLanternCharacter::Dodge(const FInputActionValue& Value)
 void AProject_JackOLanternCharacter::InteractStart(const FInputActionValue& Value)
 {
 	isInteracting = true;
+	TArray<AActor*> OverlappedActors;
 	
-	if(foundKey)
+	GetOverlappingActors(OverlappedActors, AInteractable::StaticClass());
+	
+	for(int i = 0; i < OverlappedActors.Num(); i++)
 	{
-		hasKey = true;
-		foundKey = false;
-		if(Key)
-		{
-			if(Key->ActorHasTag("Ballroom"))
-			{
-				hasBallroomKey = true;
-			}
-			Key->Collect();
-		}
+		Print(OverlappedActors[i]->GetName());
 	}
-
-	if(foundDoor && Door && hasBallroomKey)
-	{
-		if(Door->ActorHasTag("Ballroom"))
-		{
-			Door->Open();
-		}
-	}
-
-	if(foundPot && Pot)
-	{
-		Pot->Pickup();
-		foundPot = false;
-	}
-
 }
 
 void AProject_JackOLanternCharacter::InteractStop(const FInputActionValue& Value)
@@ -493,92 +361,25 @@ void AProject_JackOLanternCharacter::InteractStop(const FInputActionValue& Value
 
 void AProject_JackOLanternCharacter::Attack(const FInputActionValue& Value)
 {
-	if(!isAttacking && GetCharacterMovement()->Velocity.Z == 0.0f)
+	if(!isAttacking && !GetCharacterMovement()->IsFalling() && !isDead)
 	{
-		isAttacking = true;
+		isAttacking = true; 
+
+		//choose an attack animation to play
 		switch(PlayerStateWeapon)
 		{
 		case UNARMED:
 			PlayerStateAttacking = PUNCHING;
 			break;
-		case HAS_MELEEWEAPON:
+		case HAS_BAT:
 			PlayerStateAttacking = SWINGING_BAT;
 			break;
 		case HAS_PISTOL:
-			PlayerStateAttacking = SHOOOTING_PISTOL;
+			break;
+		case HAS_RIFLE:
 			break;
 		default:
 			Print("No Attack State");
-		}
-	}
-}
-
-void AProject_JackOLanternCharacter::AimStart(const FInputActionValue& Value)
-{
-	if(hasGun)
-	{
-		if(!isShooting && !isReloading && !isDodging)
-		{
-			if(hasPistol)
-			{
-				isAiming = true;
-				PlayerStateAttacking = AIMING_PISTOL;
-			}
-			else if(hasRifle)
-			{
-				isAiming = true;
-				PlayerStateAttacking = AIMING_RIFLE;
-			}
-		}
-	}
-}
-
-void AProject_JackOLanternCharacter::AimStop(const FInputActionValue& Value)
-{
-	if(hasGun && isAiming)
-	{
-		isAiming = false;
-		PlayerStateAttacking = NOTATTACKING;
-	}
-
-}
-
-void AProject_JackOLanternCharacter::ShootStart(const FInputActionValue& Value)
-{
-	if(isAiming && !isShooting)
-	{
-		isShooting = true;
-		FHitResult Hit;
-		FVector Start =  GetFollowCamera()->GetComponentLocation();
-		FVector End = Start + GetFollowCamera()->GetForwardVector() * 10000;
-		bool hit = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_WorldDynamic, FCollisionQueryParams::DefaultQueryParam, FCollisionResponseParams::DefaultResponseParam);
-		if(hit)
-		{
-			FTransform SpawnTransform(Hit.ImpactNormal.Rotation(), Hit.ImpactPoint);
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticles, SpawnTransform);
-		}
-		else
-		{
-			Print("Not hit");
-		}
-	}
-}
-
-void AProject_JackOLanternCharacter::ReloadStart(const FInputActionValue& Value)
-{
-	if(hasGun && !isReloading)
-	{
-		if(hasPistol)
-		{
-			isReloading = true;
-			PlayerStateAttacking = RELOADING_PISTOL;
-			
-		}
-		else if(hasRifle)
-		{
-			isReloading = true;
-			PlayerStateAttacking = RELOADING_PISTOL;
-			
 		}
 	}
 }
@@ -594,7 +395,7 @@ void AProject_JackOLanternCharacter::ChangeWeapon(const FInputActionValue& Value
 		PlayerStateWeapon = UNARMED;
 		break;
 	case 1:
-		PlayerStateWeapon = HAS_MELEEWEAPON;
+		PlayerStateWeapon = HAS_BAT;
 		break;
 	case 2:
 		PlayerStateWeapon = HAS_PISTOL;
@@ -620,7 +421,6 @@ void AProject_JackOLanternCharacter::Jump()
 		isCrouching = false;
 		isSprinting = false;
 		isDodging = false;
-		isAiming = false;
 	}
 
 }
@@ -639,36 +439,6 @@ void AProject_JackOLanternCharacter::EndDodge()
 	else
 	{
 		PlayerStateMovement = IDLE;
-	}
-}
-
-void AProject_JackOLanternCharacter::SetState()
-{
-	float velMag = GetCharacterMovement()->Velocity.Length();
-	
-	if(GetCharacterMovement()->Velocity.IsZero())
-	{
-		PlayerStateMovement = IDLE;
-	}
-	else if(velMag > crouchSpeed && velMag < sprintSpeed)
-	{
-		PlayerStateMovement = RUNNING;
-	}
-	else if(GetCharacterMovement()->IsFalling())
-	{
-		PlayerStateMovement = JUMPING;
-	}
-	else if(isSprinting)
-	{
-		PlayerStateMovement = SPRINTING;
-	}
-	else if(isCrouching)
-	{
-		PlayerStateMovement = CROUCHING;
-	}
-	else if(isDodging)
-	{
-		PlayerStateMovement = DODGING;
 	}
 }
 
@@ -729,55 +499,12 @@ void AProject_JackOLanternCharacter::SetMoveState()
 
 void AProject_JackOLanternCharacter::ThrowPot()
 {
-	Pot->Throw();
 }
 
 void AProject_JackOLanternCharacter::EndThrowPot()
 {
 	hasPot = false;
-	Pot = nullptr;
 	PlayerStateAttacking = NOTATTACKING;
-}
-
-void AProject_JackOLanternCharacter::ShootStop()
-{
-	isShooting = false;
-
-	if(isAiming)
-	{
-		PlayerStateAttacking = AIMING_PISTOL;
-	}
-	else
-	{
-		PlayerStateAttacking = NOTATTACKING;
-	}
-}
-
-void AProject_JackOLanternCharacter::ReloadStop()
-{
-	isReloading = false;
-	PlayerStateAttacking = NOTATTACKING;
-}
-
-void AProject_JackOLanternCharacter::EndAttack()
-{
-	isAttacking = false;
-	playAttackAnim = false;
-	PlayerStateAttacking = NOTATTACKING;
-
-	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-	
-}
-
-void AProject_JackOLanternCharacter::DoDamage(float DamageAmount)
-{
-	if(EnemyToDamage && overlappedEnemy)
-	{
-		Print("Damage Enemy");
-		FDamageEvent damageEvent;
-		EnemyToDamage->Damage(DamageAmount);
-		EnemyToDamage->TakeDamage(0.50f, damageEvent, GetController(), this);
-	}
 }
 
 void AProject_JackOLanternCharacter::Death()

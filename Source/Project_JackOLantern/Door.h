@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include  "Interactable.h"
 #include "GameFramework/Actor.h"
 #include "Project_JackOLanternCharacter.h"
 #include "Door.generated.h"
@@ -10,7 +11,7 @@
 class UBoxComponent;
 
 UCLASS()
-class PROJECT_JACKOLANTERN_API ADoor : public AActor
+class PROJECT_JACKOLANTERN_API ADoor : public AInteractable
 {
 	GENERATED_BODY()
 	

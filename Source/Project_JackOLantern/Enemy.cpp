@@ -19,8 +19,6 @@ AEnemy::AEnemy()
 
 	distanceFromPlayer = 0.0f;
 	health = 1.0f;
-	attacking = false;
-	doDamage = false;
 	returningToStart = false;
 	playerOnFirstFloor = true;
 	pursuePlayer = false;
@@ -45,11 +43,11 @@ void AEnemy::Tick(float DeltaTime)
 	{
 		LocatePlayer();
 
-		if(!Player->isDead && playerOnFirstFloor && !damagedAnimPlaying && !attacking && !Player->underTable)
+		if(!Player->isDead && playerOnFirstFloor && !Player->underTable)
 		{
 			PursuePlayer();
 		}
-		else if(pursuePlayer && !damagedAnimPlaying && !attacking)
+		else if(pursuePlayer )
 		{
 			pursuePlayer = false;
 			timeStopPursue = GetWorld()->GetTimeSeconds();
@@ -62,19 +60,28 @@ void AEnemy::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
 
-	if(OtherActor->ActorHasTag("Player"))
-	{
-		playerOverlapped = true;
-	}
 }
 
 void AEnemy::NotifyActorEndOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorEndOverlap(OtherActor);
-	if(OtherActor->ActorHasTag("Player"))
+	
+}
+
+float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
+	AActor* DamageCauser)
+{
+	if(!dead)
 	{
-		playerOverlapped = false;
+		health -= DamageAmount;
+		if(health <= 0.0f)
+		{
+			dead = true;
+			GetCharacterMovement()->DisableMovement();
+			GetCapsuleComponent()->SetCollisionEnabled((ECollisionEnabled::NoCollision));
+		}
 	}
+	return DamageAmount;
 }
 
 void AEnemy::LocatePlayer()
@@ -97,16 +104,12 @@ void AEnemy::PursuePlayer()
 	pursuePlayer = true;
 	returningToStart = false;
 	
-	if(distanceFromPlayer < 90.0f && !damagedAnimPlaying && !damaged)
+	if(distanceFromPlayer < 90.0f)
 	{
-		attacking = true;
 	}
 	else
 	{
-		if(!attacking && !damaged)
-		{
-			Move();
-		}
+		Move();
 	}
 }
 
@@ -155,35 +158,6 @@ void AEnemy::Move()
 
 	GetCharacterMovement()->AddInputVector(MovementVector);
 	
-}
-
-void AEnemy::Damage(float damageAmount)
-{
-	attacking = false;
-	damaged = true;
-	health -= damageAmount;
-	if(health <= 0.0f)
-	{
-		dead = true;
-		GetCharacterMovement()->DisableMovement();
-		GetCapsuleComponent()->SetCollisionEnabled((ECollisionEnabled::NoCollision));
-	}
-	
-}
-
-void AEnemy::DoDamage(float damageAmount)
-{
-	if(Player && playerOverlapped)
-	{
-		Player->health -= 0.10f;
-		if(Player->health <= 0.0f)
-		{
-			Player->Death();
-			attacking = false;
-			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), DeathParticles, GetMesh()->GetComponentLocation(), GetMesh()->GetComponentRotation(), FVector::One(), true);
-			
-		}
-	}
 }
 
 void AEnemy::SetPlayer(AProject_JackOLanternCharacter* RespawnedPlayer)

@@ -3,15 +3,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Interactable.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/Actor.h"
 #include "NiagaraComponent.h"
 #include "Pickup.generated.h"
 
 UCLASS()
-class PROJECT_JACKOLANTERN_API APickup : public AActor
+class PROJECT_JACKOLANTERN_API APickup : public AInteractable
 {
 	GENERATED_BODY()
+	
+protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* Mesh;
@@ -23,12 +26,11 @@ class PROJECT_JACKOLANTERN_API APickup : public AActor
 	UAudioComponent* Sound;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UNiagaraSystem* Explosion;
+	UNiagaraSystem* InteractParticles;
 	
 public:	
 	// Sets default values for this actor's properties
 	APickup();
-	void Collect();
 
 	float rotation;
 	float rotationSpeed;
@@ -46,7 +48,7 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+	virtual void Interact() override;
 	void Print(FString message);
-
 
 };

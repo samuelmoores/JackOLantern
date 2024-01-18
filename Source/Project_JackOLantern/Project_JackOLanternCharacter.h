@@ -20,10 +20,10 @@ UENUM(BlueprintType)
 enum MovementState { IDLE, RUNNING, JUMPING, DODGING, HURT, CROUCHING, SPRINTING };
 
 UENUM(BlueprintType)
-enum AttackingState { NOTATTACKING, PUNCHING, THROWING_POT, SHOOOTING_PISTOL,SHOOTING_RIFLE, RELOADING_PISTOL,RELOADING_RIFLE, AIMING_PISTOL, AIMING_RIFLE, SWINGING_BAT};
+enum AttackingState { NOTATTACKING, PUNCHING, THROWING_POT, SWINGING_BAT, AIMING_PISTOL, AIMING_RIFLE, RELOADING_PISTOL, RELOADING_RIFLE};
 
 UENUM(BlueprintType)
-enum WeaponState { UNARMED, HAS_PISTOL, HAS_RIFLE, HAS_MELEEWEAPON };
+enum WeaponState { UNARMED, HAS_POT, HAS_BAT, HAS_PISTOL, HAS_RIFLE };
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -43,10 +43,6 @@ class AProject_JackOLanternCharacter : public ACharacter
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
-
-	/** IDK */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UParticleSystem* HitParticles;
 
 	/** Hand Sphere Collider for Punch */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -82,25 +78,12 @@ class AProject_JackOLanternCharacter : public ACharacter
 	UInputAction* AttackAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* AimAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* ChangeWeaponAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* ShootAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* ReloadAction;
 	
 	// -------------------------------------- Variables ---------------------------------------------------------
 	MovementState PlayerStateMovement;
 	AttackingState PlayerStateAttacking;
 	WeaponState PlayerStateWeapon;
-
-	class APot* Pot;
-	class APickup* Key;
-	class ADoor* Door;
 
 	//movement
 	float runSpeed;
@@ -112,14 +95,12 @@ class AProject_JackOLanternCharacter : public ACharacter
 	bool isDodging;
 
 	//attacking
-	int attackStrength;
-	bool hasGun;
-	bool hasPistol;
-	bool hasRifle;
-	bool isAiming;
-	bool isReloading;
 	bool foundBat;
+	
 
+	//*********************************************************************** *** ******************************************************************************
+	//*********************************************************************** protected *****************************************************************************
+	//*******************************************************************************************************************************************************
 protected:
 	// ------------------------------------ Actions -------------------------------------------------------------
 	void Move(const FInputActionValue& Value);
@@ -131,11 +112,7 @@ protected:
 	void CrouchStop(const FInputActionValue& Value);
 	void Dodge(const FInputActionValue& Value);
 	void Attack(const FInputActionValue& Value);
-	void AimStart(const FInputActionValue& Value);
-	void AimStop(const FInputActionValue& Value);
 	void ChangeWeapon(const FInputActionValue& Value);
-	void ShootStart(const FInputActionValue& Value);
-	void ReloadStart(const FInputActionValue& Value);
 	void InteractStart(const FInputActionValue& Value);
 	void InteractStop(const FInputActionValue& Value);
 
@@ -146,24 +123,12 @@ protected:
 	//--------------------------------- Anim Functions -----------------------------------------------------------
 	UFUNCTION(BlueprintCallable)
 	void EndDodge();
-
-	UFUNCTION(BlueprintCallable)
-	void ShootStop();
-
-	UFUNCTION(BlueprintCallable)
-	void ReloadStop();
-
+	
 	UFUNCTION(BlueprintCallable)
 	void ThrowPot();
 
 	UFUNCTION(BlueprintCallable)
 	void EndThrowPot();
-
-	UFUNCTION(BlueprintCallable)
-	void EndAttack();
-
-	UFUNCTION(BlueprintCallable)
-	void DoDamage(float DamageAmount);
 	
 	// -------------------------------- Overridden UE Functions -------------------------------------------------
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -181,48 +146,47 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	
-	//-----------------------------------Blueprint Variables-----------------------------------------------------------
-	UPROPERTY(BlueprintReadOnly)
-	float health;
-	UPROPERTY(BlueprintReadWrite)
-	int selectedWeapon;
-	UPROPERTY(BlueprintReadWrite)
-	bool hasPot;
-	UPROPERTY(BlueprintReadOnly)
-	bool isShooting;
-	UPROPERTY(BlueprintReadOnly)
-	bool isAttacking;
+	//--------------------------------------------------------------------------------Blueprint Variables------------------------------------------------------------------------------------
+	//----------------------- pickups------------------------
 	UPROPERTY(BlueprintReadOnly)
 	bool foundKey;
+	UPROPERTY(BlueprintReadOnly)
+	bool hasKey;
 	UPROPERTY(BlueprintReadOnly)
 	bool foundDoor;
 	UPROPERTY(BlueprintReadOnly)
 	bool foundPot;
+	UPROPERTY(BlueprintReadWrite)
+	bool hasPot;
+	
+	// ------------------- attacking --------------------
 	UPROPERTY(BlueprintReadOnly)
-	bool hasKey;
+	float health;
+	UPROPERTY(BlueprintReadWrite)
+	int selectedWeapon;
+	
+	//starts attack animation
+	UPROPERTY(BlueprintReadWrite)
+	bool isAttacking;
+	
 	UPROPERTY(BlueprintReadOnly)
 	bool isDead;
-	UPROPERTY(BlueprintReadOnly)
-	bool playAttackAnim;
+
+	//--------------------movement---------------------
 	UPROPERTY(BlueprintReadOnly)
 	bool underTable;
-	
-	//--------------------------------------------Our Variables-------------------------------------------------
-	TArray<AActor*> AEnemies;
-	TArray<AEnemy*> Enemies;
-	AEnemy* EnemyToDamage;
+
+	//--------------------------------------------------------------------------------------cpp Variables---------------------------------------------------------------------------------------
 	FTimerHandle Timer;
 
 	bool isInteracting;
-	bool overlappedEnemy;
 	bool hasBallroomKey;
 
+	//------attacking----
 	float timeOfDeath;
 	float timeSinceDeath;
 	
-	//------------------------------------------- Our Functions -------------------------------------------------
-	void Print(FString message);
-
+	//------------------------------------------- States -------------------------------------------------
 	UFUNCTION(BlueprintCallable)
 	MovementState GetJackStateMovement() const {return PlayerStateMovement;}
 
@@ -235,9 +199,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetWeaponState(WeaponState PlayerWeaponState);
 
-	void SetState();
 	void SetIdleState();
 	void SetMoveState();
+
+	//------------------ Utility functions--------------------------------------------
+	void Print(FString message);
 	void Death();
 	void Respawn();
 };

@@ -10,11 +10,6 @@ APot::APot()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
-	Mesh->SetupAttachment(RootComponent);
-
-	BoxCollider = CreateDefaultSubobject<UBoxComponent>("BoxCollider");
-	BoxCollider->SetupAttachment(Mesh);
 
 }
 

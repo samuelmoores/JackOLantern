@@ -53,11 +53,11 @@ void APickup::NotifyActorBeginOverlap(AActor* OtherActor)
 	
 }
 
-void APickup::Collect()
+void APickup::Interact()
 {
-	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), Explosion, Mesh->GetComponentLocation(), Mesh->GetComponentRotation(), FVector::One(), true);
+	Super::Interact();
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), InteractParticles, Mesh->GetComponentLocation(), Mesh->GetComponentRotation(), FVector::One(), true);
 	BoxCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	keyFound = true;
 	Sound->Play();
 	startTime = GetWorld()->GetTimeSeconds();
 	GetWorldTimerManager().SetTimer(Timer, this, &APickup::HideMesh, GetWorld()->GetDeltaSeconds(), true);
@@ -88,7 +88,7 @@ void APickup::HideMesh()
 
 	if(Mesh && elapsedTime > 2.0f)
 	{
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), Explosion, Mesh->GetComponentLocation(), Mesh->GetComponentRotation(), FVector::One(), true);
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), InteractParticles, Mesh->GetComponentLocation(), Mesh->GetComponentRotation(), FVector::One(), true);
 		Mesh->SetVisibility(false);
 		GetWorldTimerManager().ClearTimer(Timer);
 	}
