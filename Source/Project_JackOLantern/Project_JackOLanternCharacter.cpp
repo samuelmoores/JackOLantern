@@ -179,10 +179,14 @@ void AProject_JackOLanternCharacter::Tick(float DeltaSeconds)
 	 	Print("no state");
 	 }*/
 
-	/*switch(PlayerStateAttacking)
+	/*
+	switch(PlayerStateAttacking)
 	{
-	case MELEE:
-		Print("Melee");
+	case PUNCHING:
+		Print("Punching");
+		break;
+	case SWINGING_BAT:
+		Print("SwingingBat");
 		break;
 	case AIMING_PISTOL:
 		Print("Aiming Pistol");
@@ -489,20 +493,24 @@ void AProject_JackOLanternCharacter::InteractStop(const FInputActionValue& Value
 
 void AProject_JackOLanternCharacter::Attack(const FInputActionValue& Value)
 {
-	if(!isAttacking && GetCharacterMovement()->Velocity.Z == 0.0f && !hasPot)
+	if(!isAttacking && GetCharacterMovement()->Velocity.Z == 0.0f)
 	{
 		isAttacking = true;
-		playAttackAnim = true;
-		if(GetVelocity().Length() < 300.0f)
+		switch(PlayerStateWeapon)
 		{
-			GetCharacterMovement()->DisableMovement();
+		case UNARMED:
+			PlayerStateAttacking = PUNCHING;
+			break;
+		case HAS_MELEEWEAPON:
+			PlayerStateAttacking = SWINGING_BAT;
+			break;
+		case HAS_PISTOL:
+			PlayerStateAttacking = SHOOOTING_PISTOL;
+			break;
+		default:
+			Print("No Attack State");
 		}
-	}else if(hasPot)
-	{
-		hasPot = false;
-		PlayerStateAttacking = THROWING_POT;
 	}
-
 }
 
 void AProject_JackOLanternCharacter::AimStart(const FInputActionValue& Value)
@@ -751,10 +759,11 @@ void AProject_JackOLanternCharacter::ReloadStop()
 	PlayerStateAttacking = NOTATTACKING;
 }
 
-void AProject_JackOLanternCharacter::EndAttackAnim()
+void AProject_JackOLanternCharacter::EndAttack()
 {
 	isAttacking = false;
 	playAttackAnim = false;
+	PlayerStateAttacking = NOTATTACKING;
 
 	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 	
