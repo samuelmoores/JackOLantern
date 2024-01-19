@@ -4,24 +4,30 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/BoxComponent.h"
+#include "Components/AudioComponent.h"
 #include "Interactable.generated.h"
 
 UCLASS()
 class PROJECT_JACKOLANTERN_API AInteractable : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
-	// Sets default values for this actor's properties
+public:
 	AInteractable();
+	virtual void Interact();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	//----------------------------------------------- variables-----------------------------------------------------
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* Mesh;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-	virtual void Interact();
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UBoxComponent* BoxCollider;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UAudioComponent* Sound;
+
+	//----------------------------------------------functions--------------------------------------------------------------------
+	void Print(FString message);
 
 };

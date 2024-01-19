@@ -12,13 +12,6 @@ ADoor::ADoor()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	Mesh->SetupAttachment(RootComponent);
-
-	BoxCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollider"));
-	BoxCollider->SetupAttachment(Mesh);
-	
-
 	isOpen = false;
 	playerFound = false;
 	openStartTime = 0.0f;
@@ -80,8 +73,10 @@ void ADoor::Tick(float DeltaTime)
 
 }
 
-void ADoor::Print(FString message)
+void ADoor::Interact()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, message, true);
+	Super::Interact();
+	Print("Interact Door");
 }
+
 

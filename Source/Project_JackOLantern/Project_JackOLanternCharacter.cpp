@@ -10,14 +10,9 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
-#include "Pickup.h"
-#include "Pot.h"
-#include "Door.h"
 #include "Enemy.h"
-#include "Kismet/GameplayStatics.h"
 #include "Project_JackOLanternGameMode.h"
 #include "Weapon.h"
-#include "Engine/DamageEvents.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -58,9 +53,6 @@ AProject_JackOLanternCharacter::AProject_JackOLanternCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
-	HitBox = CreateDefaultSubobject<USphereComponent>(TEXT("Hitbox"));
-	HitBox->SetupAttachment(GetMesh(), "middle_r_01_BIND");
-	
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
@@ -85,12 +77,11 @@ void AProject_JackOLanternCharacter::BeginPlay()
 	isDead = false;
 	foundBat = false;
 	selectedWeapon = 0;
+	overlappingEnemy = false;
 
 	//--------Interacting-------------------------------
 	hasKey = false;
 	foundDoor = false;
-	foundPot = false;
-	hasPot = false;
 	
 	//------------States------------------------------------
 	PlayerStateMovement = IDLE;
@@ -152,14 +143,8 @@ void AProject_JackOLanternCharacter::Tick(float DeltaSeconds)
 	case SWINGING_BAT:
 		Print("SwingingBat");
 		break;
-	case AIMING_PISTOL:
-		Print("Aiming Pistol");
-		break;
-	case RELOADING_PISTOL:
-		Print("Reloading Pistol");
-		break;
-	case SHOOOTING_PISTOL:
-		Print("Shooting Pistol");
+	case THROWING_POT:
+		Print("Throwing Pot");
 		break;
 	case NOTATTACKING:
 		Print("Not Attacking");
@@ -168,36 +153,26 @@ void AProject_JackOLanternCharacter::Tick(float DeltaSeconds)
 		Print("no attack state");
 	}*/
 
-	/*switch(PlayerStateWeapon)
+	/*
+	switch(PlayerStateWeapon)
 	{
-	case UNARMED:
-		Print("unarmed");
-		break;
-	case HAS_MELEEWEAPON:
-		Print("Has Melee");
-		break;
-	case HAS_PISTOL:
-		Print("Has Pistol");
-		break;
-	case HAS_RIFLE:
-		Print("Has Rifle");
+	case HAS_POT:
+		Print("Has Pot");
 		break;
 	default:
 		Print("no weapon state");
+	}
+	*/
+
+	/*if(isAttacking)
+	{
+		Print("is Attacking");
+	}
+	else
+	{
+		Print("not is Attacking");
 	}*/
 	
-}
-
-void AProject_JackOLanternCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
-{
-	Super::NotifyActorBeginOverlap(OtherActor);
-
-}
-
-void AProject_JackOLanternCharacter::NotifyActorEndOverlap(AActor* OtherActor)
-{
-	Super::NotifyActorEndOverlap(OtherActor);
-
 }
 
 void AProject_JackOLanternCharacter::Print(FString message)
@@ -348,7 +323,8 @@ void AProject_JackOLanternCharacter::InteractStart(const FInputActionValue& Valu
 	
 	for(int i = 0; i < OverlappedActors.Num(); i++)
 	{
-		Print(OverlappedActors[i]->GetName());
+		AInteractable* OverlappedActor = Cast<AInteractable>(OverlappedActors[i]);
+		OverlappedActor->Interact();
 	}
 }
 
@@ -363,13 +339,16 @@ void AProject_JackOLanternCharacter::Attack(const FInputActionValue& Value)
 {
 	if(!isAttacking && !GetCharacterMovement()->IsFalling() && !isDead)
 	{
-		isAttacking = true; 
-
+		isAttacking = true;
+		
 		//choose an attack animation to play
 		switch(PlayerStateWeapon)
 		{
 		case UNARMED:
 			PlayerStateAttacking = PUNCHING;
+			break;
+		case HAS_POT:
+			PlayerStateAttacking = THROWING_POT;
 			break;
 		case HAS_BAT:
 			PlayerStateAttacking = SWINGING_BAT;
@@ -497,16 +476,6 @@ void AProject_JackOLanternCharacter::SetMoveState()
 
 //----------------------------------------------------------------------- attacking ---------------------------------------------------------------------------------------------------
 
-void AProject_JackOLanternCharacter::ThrowPot()
-{
-}
-
-void AProject_JackOLanternCharacter::EndThrowPot()
-{
-	hasPot = false;
-	PlayerStateAttacking = NOTATTACKING;
-}
-
 void AProject_JackOLanternCharacter::Death()
 {
 	isDead = true;
@@ -518,6 +487,17 @@ void AProject_JackOLanternCharacter::Death()
 void AProject_JackOLanternCharacter::SetWeaponState(WeaponState PlayerWeaponState)
 {
 	this->PlayerStateWeapon = PlayerWeaponState;
+}
+
+void AProject_JackOLanternCharacter::SetAttackState(AttackingState PlayerAttackState)
+{
+	PlayerStateAttacking = PlayerAttackState;
+
+	//anti spam
+	if(PlayerStateAttacking == NOTATTACKING)
+	{
+		isAttacking = false;
+	}
 }
 
 

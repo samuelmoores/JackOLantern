@@ -25,18 +25,11 @@ void APot::BeginPlay()
 
 }
 
-// Called every frame
-void APot::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	
-}
-
 void APot::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
 
-	if(OtherActor->ActorHasTag("Player") && !freakout)
+	if(OtherActor->ActorHasTag("Player"))
 	{
 		if(!Player)
 		{
@@ -71,22 +64,18 @@ void APot::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveCompo
 	}
 }
 
-void APot::Pickup()
+void APot::Interact()
 {
-	if(!Player->hasPot && Player)
+	Super::Interact();
+	if(Player)
 	{
-		Mesh->SetSimulatePhysics(false);
-		playerFound = true;
-		Player->hasPot = true;
-		Mesh->SetWorldTransform(Player->GetMesh()->GetSocketTransform("clavicle_r_SOC"));
-		Mesh->AttachToComponent(Player->GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale , "clavicle_r_SOC");
+		Pickup();
 	}
 }
 
 void APot::Throw()
 {
 	hasBeenThrown = true;
-	Player->hasPot = false;
 	Mesh->SetSimulatePhysics(true);
 	playerFound = false;
 	Mesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
@@ -102,7 +91,18 @@ void APot::Throw()
 	
 	Mesh->AddImpulse(ImpulseVector, NAME_None, true);
 	Player->isAttacking = false;
+}
 
+void APot::Pickup()
+{
+	if(Player->GetJackStateWeapon() != HAS_POT)
+	{
+		Print("Pot Pickup");
+		Player->SetWeaponState(HAS_POT);
+		Mesh->SetSimulatePhysics(false);
+		Mesh->SetWorldTransform(Player->GetMesh()->GetSocketTransform("clavicle_r_SOC"));
+		Mesh->AttachToComponent(Player->GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale , "clavicle_r_SOC");
+	}
 }
 
 void APot::Shatter()
@@ -139,12 +139,6 @@ void APot::UnShatter()
 		Meshes_Broken_Spawned->Destroy();
 		GetWorldTimerManager().ClearTimer(Timer);
 	}
-}
-
-void APot::Print(FString message)
-{
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, message, true);
-
 }
 
 

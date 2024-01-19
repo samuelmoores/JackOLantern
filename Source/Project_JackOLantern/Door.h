@@ -15,12 +15,6 @@ class PROJECT_JACKOLANTERN_API ADoor : public AInteractable
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UStaticMeshComponent* Mesh;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UBoxComponent* BoxCollider;
-
 	bool isOpen;
 	bool playerFound;
 	float openStartTime;
@@ -31,7 +25,7 @@ class PROJECT_JACKOLANTERN_API ADoor : public AInteractable
 public:	
 	// Sets default values for this actor's properties
 	ADoor();
-
+	
 	void Open();
 	void Rotate();
 
@@ -44,7 +38,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	void Print(FString message);
+	virtual void Interact() override;
 
 
 };

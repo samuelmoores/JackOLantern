@@ -4,15 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "NiagaraSystem.h"
-#include "Pickup.h"
-#include "GameFramework/Character.h"
+#include "Interactable.h"
 #include "Project_JackOLanternCharacter.h"
-#include "Components/BoxComponent.h"
 
 #include "Pot.generated.h"
 
 UCLASS()
-class PROJECT_JACKOLANTERN_API APot : public APickup
+class PROJECT_JACKOLANTERN_API APot : public AInteractable
 {
 	GENERATED_BODY()
 
@@ -44,16 +42,18 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	void Print(FString message);
 
 public:	
 	APot();
-	virtual void Tick(float DeltaTime) override;
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
 	virtual void NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
-	void Pickup();
+	virtual void Interact() override;
+	
+	UFUNCTION(BlueprintCallable)
 	void Throw();
+	
+	void Pickup();
 	void Shatter();
 	void UnShatter();
 

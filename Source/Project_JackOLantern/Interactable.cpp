@@ -2,27 +2,29 @@
 
 
 #include "Interactable.h"
+#include "Components/BoxComponent.h"
+#include "Components/AudioComponent.h"
+
 
 // Sets default values
 AInteractable::AInteractable()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-}
-
-// Called when the game starts or when spawned
-void AInteractable::BeginPlay()
-{
-	Super::BeginPlay();
 	
+	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
+	Mesh->SetupAttachment(RootComponent);
+	
+	BoxCollider = CreateDefaultSubobject<UBoxComponent>("BoxCollider");
+	BoxCollider->SetupAttachment(Mesh);
+
+	Sound = CreateDefaultSubobject<UAudioComponent>("Sound");
+
 }
 
-// Called every frame
-void AInteractable::Tick(float DeltaTime)
+void AInteractable::Print(FString message)
 {
-	Super::Tick(DeltaTime);
-
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, message, true);
 }
 
 void AInteractable::Interact()

@@ -15,16 +15,7 @@ class PROJECT_JACKOLANTERN_API APickup : public AInteractable
 	GENERATED_BODY()
 	
 protected:
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UStaticMeshComponent* Mesh;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UBoxComponent* BoxCollider;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UAudioComponent* Sound;
-	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UNiagaraSystem* InteractParticles;
 	
@@ -32,14 +23,17 @@ public:
 	// Sets default values for this actor's properties
 	APickup();
 
-	float rotation;
-	float rotationSpeed;
+	//--------------------------- variables -------------------------------------------------------------------
+	bool pickedUp;
+
+	//animations
 	FTimerHandle Timer;
-	float startTime;
-	float moveSpeed;
 	FVector startLocation;
 	FVector endLocation;
-	bool keyFound;
+	float rotation;
+	float rotationSpeed;
+	float startTime;
+	float moveSpeed;
 
 protected:
 	virtual void BeginPlay() override;
@@ -49,6 +43,5 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	virtual void Interact() override;
-	void Print(FString message);
 
 };

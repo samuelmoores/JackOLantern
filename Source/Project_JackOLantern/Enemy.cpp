@@ -7,15 +7,13 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AEnemy::AEnemy()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-	HitBox = CreateDefaultSubobject<USphereComponent>("HitBox");
-	HitBox->SetupAttachment(GetMesh(), "index_l_02");
 
 	distanceFromPlayer = 0.0f;
 	health = 1.0f;
@@ -39,6 +37,13 @@ void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	//if player respawns get a new ref
+	if(!Player)
+	{
+		Player = Cast<AProject_JackOLanternCharacter>( UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	}
+
+	
 	if(Player && !dead && !AI_controlled)
 	{
 		LocatePlayer();
@@ -54,34 +59,6 @@ void AEnemy::Tick(float DeltaTime)
 			GetWorldTimerManager().SetTimer(Timer, this, &AEnemy::ReturnToStart, GetWorld()->DeltaTimeSeconds, true);
 		}
 	}
-}
-
-void AEnemy::NotifyActorBeginOverlap(AActor* OtherActor)
-{
-	Super::NotifyActorBeginOverlap(OtherActor);
-
-}
-
-void AEnemy::NotifyActorEndOverlap(AActor* OtherActor)
-{
-	Super::NotifyActorEndOverlap(OtherActor);
-	
-}
-
-float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
-	AActor* DamageCauser)
-{
-	if(!dead)
-	{
-		health -= DamageAmount;
-		if(health <= 0.0f)
-		{
-			dead = true;
-			GetCharacterMovement()->DisableMovement();
-			GetCapsuleComponent()->SetCollisionEnabled((ECollisionEnabled::NoCollision));
-		}
-	}
-	return DamageAmount;
 }
 
 void AEnemy::LocatePlayer()
@@ -154,10 +131,37 @@ void AEnemy::Move()
 
 	FRotator NewRotation = FMath::RInterpTo(GetActorRotation(), TargetRotation, GetWorld()->DeltaTimeSeconds, 3.0f);
 	
-	SetActorRotation(NewRotation);
+	//SetActorRotation(NewRotation);
 
-	GetCharacterMovement()->AddInputVector(MovementVector);
+	//GetCharacterMovement()->AddInputVector(MovementVector);
 	
+}
+
+void AEnemy::NotifyActorBeginOverlap(AActor* OtherActor)
+{
+	Super::NotifyActorBeginOverlap(OtherActor);
+
+}
+
+void AEnemy::NotifyActorEndOverlap(AActor* OtherActor)
+{
+	Super::NotifyActorEndOverlap(OtherActor);
+	
+}
+
+float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
+	AActor* DamageCauser)
+{
+	if(!dead)
+	{
+		health -= DamageAmount;
+		Print(FString::SanitizeFloat(health));
+		if(health <= 0.0f)
+		{
+			dead = true;
+		}
+	}
+	return DamageAmount;
 }
 
 void AEnemy::SetPlayer(AProject_JackOLanternCharacter* RespawnedPlayer)

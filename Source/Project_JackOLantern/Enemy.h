@@ -6,15 +6,13 @@
 #include "Components/SphereComponent.h"
 #include "GameFramework/Character.h"
 #include "NiagaraComponent.h"
+#include "GameFramework/DefaultPawn.h"
 #include "Enemy.generated.h"
 
 UCLASS()
 class PROJECT_JACKOLANTERN_API AEnemy : public ACharacter
 {
 	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
-	USphereComponent* HitBox;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
 	UNiagaraSystem* DeathParticles;

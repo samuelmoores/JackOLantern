@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Enemy.h"
 #include "InputActionValue.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "Components/SphereComponent.h"
+#include "Enemy.h"
 #include "Project_JackOLanternCharacter.generated.h"
 
 class USpringArmComponent;
@@ -43,10 +43,6 @@ class AProject_JackOLanternCharacter : public ACharacter
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
-
-	/** Hand Sphere Collider for Punch */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	USphereComponent* HitBox;
 
 	//--------------------------------- Input Actions --------------------------------------------------------
 	
@@ -124,18 +120,10 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void EndDodge();
 	
-	UFUNCTION(BlueprintCallable)
-	void ThrowPot();
-
-	UFUNCTION(BlueprintCallable)
-	void EndThrowPot();
-	
 	// -------------------------------- Overridden UE Functions -------------------------------------------------
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay();
 	virtual void Tick(float DeltaSeconds) override;
-	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
-	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
 
 	//*********************************************************************** *** ******************************************************************************
 	//*********************************************************************** public *****************************************************************************
@@ -149,26 +137,21 @@ public:
 	//--------------------------------------------------------------------------------Blueprint Variables------------------------------------------------------------------------------------
 	//----------------------- pickups------------------------
 	UPROPERTY(BlueprintReadOnly)
+	AEnemy* Enemy;
+	UPROPERTY(BlueprintReadOnly)
 	bool foundKey;
 	UPROPERTY(BlueprintReadOnly)
 	bool hasKey;
 	UPROPERTY(BlueprintReadOnly)
 	bool foundDoor;
-	UPROPERTY(BlueprintReadOnly)
-	bool foundPot;
-	UPROPERTY(BlueprintReadWrite)
-	bool hasPot;
-	
+
 	// ------------------- attacking --------------------
 	UPROPERTY(BlueprintReadOnly)
 	float health;
 	UPROPERTY(BlueprintReadWrite)
 	int selectedWeapon;
-	
-	//starts attack animation
-	UPROPERTY(BlueprintReadWrite)
-	bool isAttacking;
-	
+	UPROPERTY(BlueprintReadOnly)
+	bool overlappingEnemy;
 	UPROPERTY(BlueprintReadOnly)
 	bool isDead;
 
@@ -183,6 +166,7 @@ public:
 	bool hasBallroomKey;
 
 	//------attacking----
+	bool isAttacking;
 	float timeOfDeath;
 	float timeSinceDeath;
 	
@@ -198,6 +182,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetWeaponState(WeaponState PlayerWeaponState);
+
+	UFUNCTION(BlueprintCallable)
+	void SetAttackState(AttackingState PlayerAttackState);
 
 	void SetIdleState();
 	void SetMoveState();

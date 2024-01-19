@@ -13,17 +13,7 @@ AWeapon::AWeapon()
 
 }
 
-// Called when the game starts or when spawned
-void AWeapon::BeginPlay()
+void AWeapon::Attack()
 {
-	Super::BeginPlay();
-	
-}
-
-// Called every frame
-void AWeapon::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
 }
 
