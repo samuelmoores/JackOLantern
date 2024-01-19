@@ -2,10 +2,7 @@
 
 
 #include "Enemy.h"
-#include "Pot.h"
 #include "Project_JackOLanternCharacter.h" 
-#include "NiagaraFunctionLibrary.h"
-#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -17,6 +14,8 @@ AEnemy::AEnemy()
 
 	distanceFromPlayer = 0.0f;
 	health = 1.0f;
+	damaged = false;
+
 	returningToStart = false;
 	playerOnFirstFloor = true;
 	pursuePlayer = false;
@@ -37,6 +36,7 @@ void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+
 	//if player respawns get a new ref
 	if(!Player)
 	{
@@ -48,7 +48,7 @@ void AEnemy::Tick(float DeltaTime)
 	{
 		LocatePlayer();
 
-		if(!Player->isDead && playerOnFirstFloor && !Player->underTable)
+		if(!damaged && !Player->isDead && playerOnFirstFloor && !Player->underTable)
 		{
 			PursuePlayer();
 		}
@@ -131,9 +131,9 @@ void AEnemy::Move()
 
 	FRotator NewRotation = FMath::RInterpTo(GetActorRotation(), TargetRotation, GetWorld()->DeltaTimeSeconds, 3.0f);
 	
-	//SetActorRotation(NewRotation);
+	SetActorRotation(NewRotation);
 
-	//GetCharacterMovement()->AddInputVector(MovementVector);
+	GetCharacterMovement()->AddInputVector(MovementVector);
 	
 }
 
@@ -154,8 +154,10 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 {
 	if(!dead)
 	{
+		wasPunched = true;
 		health -= DamageAmount;
-		Print(FString::SanitizeFloat(health));
+		damaged = true;
+		wasPunched = true;
 		if(health <= 0.0f)
 		{
 			dead = true;

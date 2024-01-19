@@ -31,9 +31,13 @@ public:
 	//-------------------------------------- Blueprint Variables --------------------------------
 	UPROPERTY(BlueprintReadOnly)
 	bool returningToStart;
-
 	UPROPERTY(BlueprintReadWrite)
 	bool dead;
+	UPROPERTY(BlueprintReadWrite)
+	bool damaged;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool wasPunched;
 
 	//-------------------------------------- Blueprint Functions --------------------------------
 
