@@ -76,19 +76,22 @@ void APot::Interact()
 void APot::Throw()
 {
 	hasBeenThrown = true;
-	Mesh->SetSimulatePhysics(true);
 	playerFound = false;
-	Mesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 
+	//setup the throw
 	FVector ImpulseVector = Mesh->GetComponentTransform().GetUnitAxis(EAxis::Z);
-	
-	ImpulseVector *= 400.0f;
+	ImpulseVector *= 800.0f;
 
+	//check if you have to add players velocity to the throw so it doesn't just fucking seep out of hand
 	if(Player->GetVelocity().Length() != 0.0f)
 	{
 		ImpulseVector += Player->GetVelocity()/3;
 	}
-	
+
+	//throw the damn pot
+	Mesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	Mesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	Mesh->SetSimulatePhysics(true);
 	Mesh->AddImpulse(ImpulseVector, NAME_None, true);
 	Player->isAttacking = false;
 }
@@ -97,9 +100,9 @@ void APot::Pickup()
 {
 	if(Player->GetJackStateWeapon() != HAS_POT)
 	{
-		Print("Pot Pickup");
 		Player->SetWeaponState(HAS_POT);
 		Mesh->SetSimulatePhysics(false);
+		Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		Mesh->SetWorldTransform(Player->GetMesh()->GetSocketTransform("clavicle_r_SOC"));
 		Mesh->AttachToComponent(Player->GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale , "clavicle_r_SOC");
 	}
