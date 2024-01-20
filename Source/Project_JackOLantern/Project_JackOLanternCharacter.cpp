@@ -107,7 +107,6 @@ void AProject_JackOLanternCharacter::BeginPlay()
 
 	//--------Interacting-------------------------------
 	hasBallroomKey = false;
-	foundDoor = false;
 	
 	//------------States------------------------------------
 	PlayerStateMovement = IDLE;

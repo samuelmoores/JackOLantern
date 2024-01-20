@@ -139,12 +139,8 @@ public:
 	//----------------------- pickups------------------------
 	UPROPERTY(BlueprintReadOnly)
 	AEnemy* Enemy;
-	UPROPERTY(BlueprintReadOnly)
-	bool foundKey;
 	UPROPERTY(BlueprintReadWrite)
 	bool hasBallroomKey;
-	UPROPERTY(BlueprintReadOnly)
-	bool foundDoor;
 
 	// ------------------- attacking --------------------
 	UPROPERTY(BlueprintReadOnly)
