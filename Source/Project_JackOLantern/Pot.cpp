@@ -98,7 +98,7 @@ void APot::Throw()
 
 void APot::Pickup()
 {
-	if(Player->GetJackStateWeapon() != HAS_POT)
+	if(Player->GetJackStateWeapon() != HAS_POT && Player->GetJackStateWeapon() == UNARMED)
 	{
 		Player->SetWeaponState(HAS_POT);
 		Mesh->SetSimulatePhysics(false);

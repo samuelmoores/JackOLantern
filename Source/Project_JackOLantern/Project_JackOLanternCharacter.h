@@ -140,8 +140,8 @@ public:
 	AEnemy* Enemy;
 	UPROPERTY(BlueprintReadOnly)
 	bool foundKey;
-	UPROPERTY(BlueprintReadOnly)
-	bool hasKey;
+	UPROPERTY(BlueprintReadWrite)
+	bool hasBallroomKey;
 	UPROPERTY(BlueprintReadOnly)
 	bool foundDoor;
 
@@ -161,10 +161,8 @@ public:
 
 	//--------------------------------------------------------------------------------------cpp Variables---------------------------------------------------------------------------------------
 	FTimerHandle Timer;
-
 	bool isInteracting;
-	bool hasBallroomKey;
-
+	
 	//------attacking----
 	bool isAttacking;
 	float timeOfDeath;

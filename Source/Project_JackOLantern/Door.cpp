@@ -42,41 +42,9 @@ void ADoor::BeginPlay()
 	
 }
 
-void ADoor::NotifyActorBeginOverlap(AActor* OtherActor)
-{
-	Super::NotifyActorBeginOverlap(OtherActor);
-
-	if(OtherActor->ActorHasTag("Player"))
-	{
-		player = Cast<AProject_JackOLanternCharacter>(OtherActor);
-		if(player)
-		{
-			playerFound = true;
-		}
-	}
-}
-
-void ADoor::NotifyActorEndOverlap(AActor* OtherActor)
-{
-	Super::NotifyActorEndOverlap(OtherActor);
-
-	if(playerFound)
-	{
-		playerFound = false;
-	}
-}
-
-// Called every frame
-void ADoor::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
 void ADoor::Interact()
 {
-	Super::Interact();
-	Print("Interact Door");
+	
 }
 
 

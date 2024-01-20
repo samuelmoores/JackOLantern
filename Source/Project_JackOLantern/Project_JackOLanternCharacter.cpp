@@ -80,7 +80,7 @@ void AProject_JackOLanternCharacter::BeginPlay()
 	overlappingEnemy = false;
 
 	//--------Interacting-------------------------------
-	hasKey = false;
+	hasBallroomKey = false;
 	foundDoor = false;
 	
 	//------------States------------------------------------
@@ -153,16 +153,21 @@ void AProject_JackOLanternCharacter::Tick(float DeltaSeconds)
 		Print("no attack state");
 	}*/
 
-	/*
+	
 	switch(PlayerStateWeapon)
 	{
 	case HAS_POT:
 		Print("Has Pot");
+	case HAS_BAT:
+		Print("Has Bat");
+		break;
+	case UNARMED:
+		Print("Unarmed");
 		break;
 	default:
 		Print("no weapon state");
 	}
-	*/
+	
 
 	/*if(isAttacking)
 	{
