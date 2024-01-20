@@ -29,22 +29,17 @@ void AEnemy::BeginPlay()
 	StartingPosition = GetActorLocation();
 	StartingRotation = GetActorRotation();
 	dead = false;
+
+	Player = Cast<AProject_JackOLanternCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	
 }
 
 // Called every frame
 void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-
-	//if player respawns get a new ref
-	if(!Player)
-	{
-		Player = Cast<AProject_JackOLanternCharacter>( UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-	}
-
 	
-	if(Player && !dead && !AI_controlled)
+	if(!dead && !AI_controlled)
 	{
 		LocatePlayer();
 
@@ -52,13 +47,15 @@ void AEnemy::Tick(float DeltaTime)
 		{
 			PursuePlayer();
 		}
-		else if(pursuePlayer )
+		else if(pursuePlayer && !attacking )
 		{
 			pursuePlayer = false;
 			timeStopPursue = GetWorld()->GetTimeSeconds();
 			GetWorldTimerManager().SetTimer(Timer, this, &AEnemy::ReturnToStart, GetWorld()->DeltaTimeSeconds, true);
 		}
 	}
+	
+	
 }
 
 void AEnemy::LocatePlayer()
@@ -99,7 +96,7 @@ void AEnemy::ReturnToStart()
 	if(timeSinceStopPursue > 3.0f )
 	{
 		returningToStart = true;
-		
+
 		Move();
 		
 		if(distanceFromStart < 10.0f)
@@ -107,7 +104,7 @@ void AEnemy::ReturnToStart()
 			GetWorldTimerManager().ClearTimer(Timer);
 			SetActorRotation(StartingRotation);
 		}
-		if(!Player->isDead && playerOnFirstFloor)
+		if(!Player->isDead && playerOnFirstFloor) //if player goes up stairs stop chasing
 		{
 			GetWorldTimerManager().ClearTimer(Timer);
 		}

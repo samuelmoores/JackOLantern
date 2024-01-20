@@ -13,6 +13,7 @@
 #include "Enemy.h"
 #include "Project_JackOLanternGameMode.h"
 #include "Weapon.h"
+#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -61,6 +62,12 @@ float AProject_JackOLanternCharacter::TakeDamage(float DamageAmount, FDamageEven
 	AController* EventInstigator, AActor* DamageCauser)
 {
 	health -= DamageAmount;
+	if( health <= 0.0f)
+	{
+		isDead = true;
+		timeOfDeath = GetWorld()->GetTimeSeconds();
+		GetWorldTimerManager().SetTimer(Timer, this, &AProject_JackOLanternCharacter::Respawn, GetWorld()->DeltaTimeSeconds, true);
+	}
 	return DamageAmount;
 }
 
@@ -68,6 +75,18 @@ void AProject_JackOLanternCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+
+	TArray<AActor*> Enemies;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEnemy::StaticClass(), Enemies);
+
+	for(int i = 0; i < Enemies.Num(); i++)
+	{
+		AEnemy* EnemyToUpdate = Cast<AEnemy>(Enemies[i]);
+		if(EnemyToUpdate)
+		{
+			EnemyToUpdate->Player = Cast<AProject_JackOLanternCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+		}
+	}
 
 	health = 1.0f;
 
@@ -518,7 +537,7 @@ void AProject_JackOLanternCharacter::SetAttackState(AttackingState PlayerAttackS
 void AProject_JackOLanternCharacter::CallRestartPlayer()
 {
 	AController* ControllerRef = GetController();
-
+	
 	Destroy();
 
 	if(UWorld* World =  GetWorld())
@@ -534,7 +553,7 @@ void AProject_JackOLanternCharacter::Respawn()
 {
 	timeSinceDeath = GetWorld()->TimeSeconds - timeOfDeath;
 
-	if(timeSinceDeath > 7.0f)
+	if(timeSinceDeath > 6.0f)
 	{
 		isDead = false;
 		CallRestartPlayer();
