@@ -57,6 +57,13 @@ AProject_JackOLanternCharacter::AProject_JackOLanternCharacter()
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
 
+float AProject_JackOLanternCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
+	AController* EventInstigator, AActor* DamageCauser)
+{
+	health -= DamageAmount;
+	return DamageAmount;
+}
+
 void AProject_JackOLanternCharacter::BeginPlay()
 {
 	// Call the base class  

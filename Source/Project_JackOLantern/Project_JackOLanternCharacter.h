@@ -133,6 +133,7 @@ public:
 	AProject_JackOLanternCharacter();
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	
 	//--------------------------------------------------------------------------------Blueprint Variables------------------------------------------------------------------------------------
 	//----------------------- pickups------------------------
