@@ -13,6 +13,17 @@ AWeapon::AWeapon()
 
 }
 
+void AWeapon::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if(!pickedUp)
+	{
+		Mesh->SetRelativeRotation(FRotator(Mesh->GetComponentRotation().Pitch, Mesh->GetComponentRotation().Yaw + (DeltaSeconds * 100.0f), Mesh->GetComponentRotation().Roll));
+	
+	}
+}
+
 void AWeapon::Attack()
 {
 }

@@ -154,7 +154,7 @@ void AProject_JackOLanternCharacter::Tick(float DeltaSeconds)
 	}*/
 
 	
-	switch(PlayerStateWeapon)
+	/*switch(PlayerStateWeapon)
 	{
 	case HAS_POT:
 		Print("Has Pot");
@@ -166,7 +166,7 @@ void AProject_JackOLanternCharacter::Tick(float DeltaSeconds)
 		break;
 	default:
 		Print("no weapon state");
-	}
+	}*/
 	
 
 	/*if(isAttacking)

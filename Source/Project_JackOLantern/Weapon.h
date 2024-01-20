@@ -15,5 +15,9 @@ class PROJECT_JACKOLANTERN_API AWeapon : public AInteractable
 public:	
 	// Sets default values for this actor's properties
 	AWeapon();
+	virtual void Tick(float DeltaSeconds) override;
 	virtual void Attack();
+
+	UPROPERTY(BlueprintReadWrite)
+	bool pickedUp;
 };
