@@ -48,7 +48,7 @@ void AEnemy::Tick(float DeltaTime)
 	{
 		LocatePlayer();
 
-		if(!damaged && !Player->isDead && playerOnFirstFloor && !Player->underTable)
+		if(!damaged && !attacking && !Player->isDead && playerOnFirstFloor && !Player->underTable)
 		{
 			PursuePlayer();
 		}
@@ -83,9 +83,11 @@ void AEnemy::PursuePlayer()
 	
 	if(distanceFromPlayer < 90.0f)
 	{
+		attacking = true;
 	}
 	else
 	{
+		attacking = false;
 		Move();
 	}
 }
@@ -137,23 +139,12 @@ void AEnemy::Move()
 	
 }
 
-void AEnemy::NotifyActorBeginOverlap(AActor* OtherActor)
-{
-	Super::NotifyActorBeginOverlap(OtherActor);
-
-}
-
-void AEnemy::NotifyActorEndOverlap(AActor* OtherActor)
-{
-	Super::NotifyActorEndOverlap(OtherActor);
-	
-}
-
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
 	AActor* DamageCauser)
 {
 	if(!dead)
 	{
+		attacking = false;
 		wasPunched = true;
 		health -= DamageAmount;
 		damaged = true;

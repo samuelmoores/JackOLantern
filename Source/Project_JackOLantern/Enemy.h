@@ -35,10 +35,11 @@ public:
 	bool dead;
 	UPROPERTY(BlueprintReadWrite)
 	bool damaged;
-
 	UPROPERTY(BlueprintReadWrite)
 	bool wasPunched;
-
+	UPROPERTY(BlueprintReadWrite)
+	bool attacking;
+	
 	//-------------------------------------- Blueprint Functions --------------------------------
 
 	//-----------------------------------Variables---------------------------------------------------
