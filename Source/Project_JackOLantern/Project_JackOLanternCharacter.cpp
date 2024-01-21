@@ -58,19 +58,6 @@ AProject_JackOLanternCharacter::AProject_JackOLanternCharacter()
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
 
-float AProject_JackOLanternCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
-	AController* EventInstigator, AActor* DamageCauser)
-{
-	health -= DamageAmount;
-	if( health <= 0.0f)
-	{
-		isDead = true;
-		timeOfDeath = GetWorld()->GetTimeSeconds();
-		GetWorldTimerManager().SetTimer(Timer, this, &AProject_JackOLanternCharacter::Respawn, GetWorld()->DeltaTimeSeconds, true);
-	}
-	return DamageAmount;
-}
-
 void AProject_JackOLanternCharacter::BeginPlay()
 {
 	// Call the base class  
@@ -101,6 +88,7 @@ void AProject_JackOLanternCharacter::BeginPlay()
 
 	//---------Attacking---------------------------------------------
 	isDead = false;
+	damaged = false;
 	foundBat = false;
 	selectedWeapon = 0;
 	overlappingEnemy = false;
@@ -203,6 +191,21 @@ void AProject_JackOLanternCharacter::Tick(float DeltaSeconds)
 		Print("not is Attacking");
 	}*/
 	
+}
+
+float AProject_JackOLanternCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
+	AController* EventInstigator, AActor* DamageCauser)
+{
+	damaged = true;
+	GetCharacterMovement()->DisableMovement();
+	health -= DamageAmount;
+	if( health <= 0.0f)
+	{
+		isDead = true;
+		timeOfDeath = GetWorld()->GetTimeSeconds();
+		GetWorldTimerManager().SetTimer(Timer, this, &AProject_JackOLanternCharacter::Respawn, GetWorld()->DeltaTimeSeconds, true);
+	}
+	return DamageAmount;
 }
 
 void AProject_JackOLanternCharacter::Print(FString message)

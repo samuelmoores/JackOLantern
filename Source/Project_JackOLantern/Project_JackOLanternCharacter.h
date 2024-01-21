@@ -149,6 +149,8 @@ public:
 	int selectedWeapon;
 	UPROPERTY(BlueprintReadOnly)
 	bool overlappingEnemy;
+	UPROPERTY(BlueprintReadWrite)
+	bool damaged;
 	UPROPERTY(BlueprintReadOnly)
 	bool isDead;
 
