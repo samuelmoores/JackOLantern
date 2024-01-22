@@ -147,12 +147,12 @@ public:
 	float health;
 	UPROPERTY(BlueprintReadWrite)
 	int selectedWeapon;
-	UPROPERTY(BlueprintReadOnly)
-	bool overlappingEnemy;
 	UPROPERTY(BlueprintReadWrite)
 	bool damaged;
 	UPROPERTY(BlueprintReadOnly)
 	bool isDead;
+	UPROPERTY(BlueprintReadWrite)
+	bool hasBat;
 
 	//--------------------movement---------------------
 	UPROPERTY(BlueprintReadOnly)

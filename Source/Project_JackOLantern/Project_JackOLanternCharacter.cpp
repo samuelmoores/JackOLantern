@@ -91,7 +91,6 @@ void AProject_JackOLanternCharacter::BeginPlay()
 	damaged = false;
 	foundBat = false;
 	selectedWeapon = 0;
-	overlappingEnemy = false;
 
 	//--------Interacting-------------------------------
 	hasBallroomKey = false;
@@ -400,24 +399,28 @@ void AProject_JackOLanternCharacter::ChangeWeapon(const FInputActionValue& Value
 {
 	//Print("Change Weapon");
 	//Print(FString::SanitizeFloat(selectedWeapon));
-	
-	switch(selectedWeapon)
+
+	if(hasBat)
 	{
-	case 0:
-		PlayerStateWeapon = UNARMED;
-		break;
-	case 1:
-		PlayerStateWeapon = HAS_BAT;
-		break;
-	case 2:
-		PlayerStateWeapon = HAS_PISTOL;
-		break;
-	case 3:
-		PlayerStateWeapon = HAS_RIFLE;
-		break;
-	default:
-		PlayerStateWeapon = UNARMED;
+		switch(selectedWeapon)
+		{
+		case 0:
+			PlayerStateWeapon = UNARMED;
+			break;
+		case 1:
+			PlayerStateWeapon = HAS_BAT;
+			break;
+		case 2:
+			PlayerStateWeapon = HAS_PISTOL;
+			break;
+		case 3:
+			PlayerStateWeapon = HAS_RIFLE;
+			break;
+		default:
+			PlayerStateWeapon = UNARMED;
+		}
 	}
+	
 }
 
 //----------------------------------------------------------------------------- movement -------------------------------------------------------------------------------------------------------
