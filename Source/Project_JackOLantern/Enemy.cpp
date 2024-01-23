@@ -3,6 +3,7 @@
 
 #include "Enemy.h"
 #include "Project_JackOLanternCharacter.h" 
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -149,6 +150,7 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 		if(health <= 0.0f)
 		{
 			dead = true;
+			GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		}
 	}
 	return DamageAmount;
