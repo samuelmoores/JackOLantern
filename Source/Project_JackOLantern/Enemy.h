@@ -20,6 +20,9 @@ class PROJECT_JACKOLANTERN_API AEnemy : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	bool AI_controlled;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	bool isGhost;
+
 protected:
 	// Called when the game starts or when spawned
 	AEnemy();

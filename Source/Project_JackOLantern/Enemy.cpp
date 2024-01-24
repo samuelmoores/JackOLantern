@@ -31,6 +31,10 @@ void AEnemy::BeginPlay()
 	StartingRotation = GetActorRotation();
 	dead = false;
 
+	//Don't chase the player until they go near the ghost
+	playerFound = false;
+
+	//set the reference so the enemy can find the player
 	Player = Cast<AProject_JackOLanternCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 	
 }
@@ -55,8 +59,6 @@ void AEnemy::Tick(float DeltaTime)
 			GetWorldTimerManager().SetTimer(Timer, this, &AEnemy::ReturnToStart, GetWorld()->DeltaTimeSeconds, true);
 		}
 	}
-	
-	
 }
 
 void AEnemy::LocatePlayer()
@@ -78,16 +80,47 @@ void AEnemy::PursuePlayer()
 {
 	pursuePlayer = true;
 	returningToStart = false;
+
+	// --------------------------------------------- Ghost Movement ---------------------------------------------------------------
+	if(isGhost)
+	{
+		//don't start chasing player until the player is near the ghost for the first time
+		if(distanceFromPlayer < 500.0f && !playerFound)
+		{
+			playerFound = true;
+		}
+
+		//once the player is near the ghost, don't stop chasing the player
+		//make sure the ghost if facing the player while it attacks
+		if(distanceFromPlayer < 400.0f && playerFound)
+		{
+			GetCharacterMovement()->DisableMovement();
+			DirectionToMovement = Player->GetActorLocation() - GetActorLocation();
+			DirectionToMovement.Normalize();
+			FVector MovementVector = DirectionToMovement ;
+			FRotator TargetRotation = MovementVector.ToOrientationRotator();
+			FRotator NewRotation = FMath::RInterpTo(GetActorRotation(), TargetRotation, GetWorld()->DeltaTimeSeconds, 3.0f);
+			SetActorRotation(NewRotation);
+		}
+		else if(playerFound)
+		{
+			GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+			Move();
+		}
+	}
+	else //------------------------------ Regular Zombie Movement ---------------------------------------------------------------
+	{
+		if(distanceFromPlayer < 90.0f)
+		{
+			attacking = true;
+		}
+		else
+		{
+			attacking = false;
+			Move();
+		}
+	}
 	
-	if(distanceFromPlayer < 90.0f)
-	{
-		attacking = true;
-	}
-	else
-	{
-		attacking = false;
-		Move();
-	}
 }
 
 void AEnemy::ReturnToStart()
