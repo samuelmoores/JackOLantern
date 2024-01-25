@@ -85,7 +85,7 @@ void AEnemy::PursuePlayer()
 	if(isGhost)
 	{
 		//don't start chasing player until the player is near the ghost for the first time
-		if(distanceFromPlayer < 500.0f && !playerFound)
+		if(distanceFromPlayer < 1350.0f && !playerFound)
 		{
 			playerFound = true;
 		}
