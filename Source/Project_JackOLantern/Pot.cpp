@@ -112,6 +112,7 @@ void APot::Pickup()
 void APot::Shatter()
 {
 	shattered = true;
+	Sound->Play();
 	FActorSpawnParameters spawnParams;
 	Mesh->SetVisibility(false);
 	BoxCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
