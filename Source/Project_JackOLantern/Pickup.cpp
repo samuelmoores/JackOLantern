@@ -37,11 +37,6 @@ void APickup::Tick(float DeltaTime)
 	
 }
 
-void APickup::NotifyActorBeginOverlap(AActor* OtherActor)
-{
-	
-}
-
 void APickup::Interact()
 {
 	Super::Interact();
