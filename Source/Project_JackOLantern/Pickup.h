@@ -40,7 +40,7 @@ protected:
 	void HideMesh();
 
 public:	
-	virtual void Tick(float DeltaTime) override;
+	virtual void Tick(float DeltaTime) override; 
 	virtual void Interact() override;
 
 };
