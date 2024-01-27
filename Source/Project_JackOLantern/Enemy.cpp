@@ -66,7 +66,7 @@ void AEnemy::LocatePlayer()
 	distanceFromPlayer = FVector::Distance(GetActorLocation(), Player->GetActorLocation());
 	distanceFromStart = FVector::Distance(GetActorLocation(), StartingPosition);
 
-	if(Player->GetActorLocation().Z > 300.0f)
+	if(Player->GetActorLocation().Z > 1000.0f)
 	{
 		playerOnFirstFloor = false;
 	}
