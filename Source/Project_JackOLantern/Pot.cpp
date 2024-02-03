@@ -83,7 +83,7 @@ void APot::Throw()
 	ImpulseVector *= 800.0f;
 	Player->GetMesh()->SetCollisionResponseToChannel(ECC_PhysicsBody, ECR_Ignore);
 
-	//check if you have to add players velocity to the throw so it doesn't just fucking seep out of hand
+	//check if you have to add players velocity to the throw so it doesn't just fucking seep out of hand if running and throwing
 	if(Player->GetVelocity().Length() != 0.0f)
 	{
 		ImpulseVector += Player->GetVelocity()/3;
