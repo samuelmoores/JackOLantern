@@ -324,6 +324,7 @@ void AProject_JackOLanternCharacter::CrouchStart(const FInputActionValue& Value)
 	if(!isSprinting && !GetCharacterMovement()->IsFalling())
 	{
 		PlayerStateMovement = CROUCHING;
+		isCrouching = true;
 		Crouch();
 	}
 }
@@ -334,8 +335,7 @@ void AProject_JackOLanternCharacter::CrouchStop(const FInputActionValue& Value)
 	{
 		UnCrouch();
 		PlayerStateMovement = IDLE;
-		//GetCharacterMovement()->bWantsToCrouch = false;
-
+		isCrouching = false;
 	}
 }
 
