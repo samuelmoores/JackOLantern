@@ -18,14 +18,7 @@ public:
 
 protected:
 	//----------------------------------------------- variables-----------------------------------------------------
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UStaticMeshComponent* Mesh;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UBoxComponent* BoxCollider;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UAudioComponent* Sound;
 
 	//----------------------------------------------functions--------------------------------------------------------------------
 	void Print(FString message);

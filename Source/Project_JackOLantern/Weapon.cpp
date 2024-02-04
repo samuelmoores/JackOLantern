@@ -15,7 +15,7 @@ AWeapon::AWeapon()
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
-	Mesh->SetWorldScale3D(FVector(2.0f, 2.0f, 2.0f));
+	//Mesh->SetWorldScale3D(FVector(2.0f, 2.0f, 2.0f));
 
 }
 
@@ -25,12 +25,12 @@ void AWeapon::Tick(float DeltaSeconds)
 
 	if(!pickedUp)
 	{
-		Mesh->SetRelativeRotation(FRotator(Mesh->GetComponentRotation().Pitch, Mesh->GetComponentRotation().Yaw + (DeltaSeconds * 100.0f), Mesh->GetComponentRotation().Roll));
+		//Mesh->SetRelativeRotation(FRotator(Mesh->GetComponentRotation().Pitch, Mesh->GetComponentRotation().Yaw + (DeltaSeconds * 100.0f), Mesh->GetComponentRotation().Roll));
 	
 	}
 	else
 	{
-		Mesh->SetWorldScale3D(FVector::One());
+		//Mesh->SetWorldScale3D(FVector::One());
 
 	}
 }

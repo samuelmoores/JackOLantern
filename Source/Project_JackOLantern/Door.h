@@ -15,6 +15,12 @@ class PROJECT_JACKOLANTERN_API ADoor : public AInteractable
 {
 	GENERATED_BODY()
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* Mesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UBoxComponent* BoxCollider;
+	
 	bool isOpen;
 	bool playerFound;
 	float openStartTime;

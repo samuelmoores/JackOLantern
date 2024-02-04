@@ -165,7 +165,6 @@ void AProject_JackOLanternCharacter::Tick(float DeltaSeconds)
 		Print("no attack state");
 	}*/
 
-	
 	/*switch(PlayerStateWeapon)
 	{
 	case HAS_POT:
@@ -180,7 +179,6 @@ void AProject_JackOLanternCharacter::Tick(float DeltaSeconds)
 		Print("no weapon state");
 	}*/
 	
-
 	/*if(isAttacking)
 	{
 		Print("is Attacking");

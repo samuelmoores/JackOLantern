@@ -9,17 +9,19 @@ APot::APot()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-
+	
+	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
+	Mesh->SetupAttachment(RootComponent);
+	
+	Sound = CreateDefaultSubobject<UAudioComponent>("Sound");
 }
 
 // Called when the game starts or when spawned
 void APot::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	playerFound = false;
-	BoxCollider->AttachToComponent(Mesh, FAttachmentTransformRules::KeepRelativeTransform);
 	hasBeenThrown = false;
 	killedEnemy = false;
 
@@ -115,7 +117,7 @@ void APot::Shatter()
 	Sound->Play();
 	FActorSpawnParameters spawnParams;
 	Mesh->SetVisibility(false);
-	BoxCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//BoxCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Mesh->SetSimulatePhysics(false);
 
 	if(!killedEnemy)
@@ -138,7 +140,7 @@ void APot::UnShatter()
 	if(timeSinceShatter > 3.0f)
 	{
 		Mesh->SetVisibility(true);
-		BoxCollider->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		//BoxCollider->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		shattered = false;
 		playerFound = false;
 		Meshes_Broken_Spawned->Destroy();

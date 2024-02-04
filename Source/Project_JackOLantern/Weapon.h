@@ -9,7 +9,7 @@
 #include "Weapon.generated.h"
 
 UCLASS()
-class PROJECT_JACKOLANTERN_API AWeapon : public AInteractable
+class PROJECT_JACKOLANTERN_API AWeapon : public AActor
 {
 	GENERATED_BODY()
 public:	

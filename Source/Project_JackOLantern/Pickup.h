@@ -10,11 +10,20 @@
 #include "Pickup.generated.h"
 
 UCLASS()
-class PROJECT_JACKOLANTERN_API APickup : public AInteractable
+class PROJECT_JACKOLANTERN_API APickup : public AActor
 {
 	GENERATED_BODY()
 	
 protected:
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* Mesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UBoxComponent* BoxCollider;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UAudioComponent* Sound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UNiagaraSystem* InteractParticles;
@@ -40,7 +49,10 @@ protected:
 	void HideMesh();
 
 public:	
-	virtual void Tick(float DeltaTime) override; 
-	virtual void Interact() override;
+	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION(BlueprintCallable)
+	void Interact_With_Pickup();
+
 
 };

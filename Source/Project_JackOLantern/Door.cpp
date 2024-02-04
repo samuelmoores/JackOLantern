@@ -11,7 +11,12 @@ ADoor::ADoor()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	
+	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
+	Mesh->SetupAttachment(RootComponent);
+	
+	BoxCollider = CreateDefaultSubobject<UBoxComponent>("BoxCollider");
+	
 	isOpen = false;
 	playerFound = false;
 	openStartTime = 0.0f;
@@ -39,6 +44,7 @@ void ADoor::Rotate()
 void ADoor::BeginPlay()
 {
 	Super::BeginPlay();
+
 	
 }
 

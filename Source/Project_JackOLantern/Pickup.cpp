@@ -10,7 +10,14 @@ APickup::APickup()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
+	Mesh->SetupAttachment(RootComponent);
+	
+	BoxCollider = CreateDefaultSubobject<UBoxComponent>("BoxCollider");
+	BoxCollider->SetupAttachment(Mesh);
 
+	Sound = CreateDefaultSubobject<UAudioComponent>("Sound");
+	
 }
 
 // Called when the game starts or when spawned
@@ -37,9 +44,8 @@ void APickup::Tick(float DeltaTime)
 	
 }
 
-void APickup::Interact()
+void APickup::Interact_With_Pickup()
 {
-	Super::Interact();
 	Mesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), InteractParticles, Mesh->GetComponentLocation(), Mesh->GetComponentRotation(), FVector::One(), true);
 	Sound->Play();
