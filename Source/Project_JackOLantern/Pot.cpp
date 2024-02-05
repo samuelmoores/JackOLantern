@@ -51,16 +51,16 @@ void APot::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveCompo
 	FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
 {
 	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
-	const bool bHitLevel = Other->ActorHasTag("Level");
+	hitLevel = Other->ActorHasTag("Level");
 	const bool bHitEnemy = Other->ActorHasTag("Enemy"); 
 	
-	if((bHitLevel || bHitEnemy) && !shattered && hasBeenThrown)
+	if((hitLevel || bHitEnemy) && !shattered && hasBeenThrown)
 	{
 		hasBeenThrown = false;
 		if(bHitEnemy)
 		{
 			AEnemy* Enemy = Cast<AEnemy>(Other);
-			Enemy->TakeDamage(0.5f);
+			Enemy->TakeDamage(1.0f);
 			Enemy->GetCharacterMovement()->DisableMovement();
 			if(Enemy->health <= 0.0f)
 			{
@@ -124,10 +124,9 @@ void APot::Shatter()
 	Sound->Play();
 	FActorSpawnParameters spawnParams;
 	Mesh->SetVisibility(false);
-	//BoxCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Mesh->SetSimulatePhysics(false);
 
-	if(!killedEnemy)
+	if(hitLevel)
 	{
 		Meshes_Broken_Spawned = GetWorld()->SpawnActor<AActor>(Meshes_Broken, GetActorLocation(), GetActorRotation(), spawnParams);
 

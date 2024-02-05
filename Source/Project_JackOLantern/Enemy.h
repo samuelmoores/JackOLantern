@@ -17,6 +17,9 @@ class PROJECT_JACKOLANTERN_API AEnemy : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
 	UNiagaraSystem* DeathParticles;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Health, meta = (AllowPrivateAccess = "true"))
+	float defaultHealth;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	bool AI_controlled;
 
@@ -40,7 +43,7 @@ public:
 	bool wasPunched;
 	UPROPERTY(BlueprintReadWrite)
 	bool attacking;
-	
+
 	//-------------------------------------- Blueprint Functions --------------------------------
 
 	//-----------------------------------Variables---------------------------------------------------
@@ -62,6 +65,8 @@ public:
 
 	//-------------- attacking -----------------------------------------
 	float health;
+	
+
 	
 	//--------------------------------Functions------------------------------------------------------
 	void Print(FString message);

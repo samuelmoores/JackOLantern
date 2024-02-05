@@ -44,6 +44,7 @@ public:
 	float timeOfShatter;
 	float timeSinceShatter;
 	bool killedEnemy;
+	bool hitLevel;
 
 protected:
 	// Called when the game starts or when spawned

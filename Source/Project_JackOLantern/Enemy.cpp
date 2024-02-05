@@ -14,7 +14,6 @@ AEnemy::AEnemy()
 	PrimaryActorTick.bCanEverTick = true;
 
 	distanceFromPlayer = 0.0f;
-	health = 1.0f;
 	damaged = false;
 
 	returningToStart = false;
@@ -30,6 +29,8 @@ void AEnemy::BeginPlay()
 	StartingPosition = GetActorLocation();
 	StartingRotation = GetActorRotation();
 	dead = false;
+	health = defaultHealth;
+
 
 	//Don't chase the player until they go near the ghost
 	playerFound = false;
@@ -172,7 +173,6 @@ void AEnemy::Move()
 
 float AEnemy::TakeDamage(float DamageAmount)
 {
-	Print("TakeDamage");
 	if(!dead)
 	{
 		attacking = false;
