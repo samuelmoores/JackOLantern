@@ -69,7 +69,10 @@ public:
 	void Move();
 	void ReturnToStart();
 	void PursuePlayer();
-	virtual float TakeDamage(float DamageAmount);
+
+	UFUNCTION(BlueprintCallable)
+	float TakeDamage(float DamageAmount);
+
 	void LocatePlayer();
 
 };

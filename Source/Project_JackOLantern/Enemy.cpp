@@ -172,6 +172,7 @@ void AEnemy::Move()
 
 float AEnemy::TakeDamage(float DamageAmount)
 {
+	Print("TakeDamage");
 	if(!dead)
 	{
 		attacking = false;
