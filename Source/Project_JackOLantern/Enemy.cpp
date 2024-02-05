@@ -170,8 +170,7 @@ void AEnemy::Move()
 	
 }
 
-float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
-	AActor* DamageCauser)
+float AEnemy::TakeDamage(float DamageAmount)
 {
 	if(!dead)
 	{

@@ -3,6 +3,7 @@
 #include "Enemy.h"
 #include "Project_JackOLanternCharacter.h"
 #include "NiagaraFunctionLibrary.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 APot::APot()
@@ -59,8 +60,14 @@ void APot::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveCompo
 		if(bHitEnemy)
 		{
 			AEnemy* Enemy = Cast<AEnemy>(Other);
-			Enemy->dead = true;
-			killedEnemy = true;
+			Enemy->TakeDamage(0.5f);
+			Enemy->GetCharacterMovement()->DisableMovement();
+			if(Enemy->health <= 0.0f)
+			{
+				Enemy->dead = true;
+				Enemy->GetMesh()->SetSimulatePhysics(true);
+				killedEnemy = true;
+			}
 		}
 		Shatter();
 	}

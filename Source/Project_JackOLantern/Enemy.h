@@ -69,7 +69,7 @@ public:
 	void Move();
 	void ReturnToStart();
 	void PursuePlayer();
-	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	virtual float TakeDamage(float DamageAmount);
 	void LocatePlayer();
 
 };
