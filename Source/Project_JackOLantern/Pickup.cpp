@@ -80,7 +80,7 @@ void APickup::HideMesh()
 	{
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), InteractParticles, Mesh->GetComponentLocation(), Mesh->GetComponentRotation(), FVector::One(), true);
 		GetWorldTimerManager().ClearTimer(Timer);
-		Destroy();
+		Mesh->SetVisibility(false);
 	}
 
 	if(Mesh->GetComponentLocation().Z < endLocation.Z)
