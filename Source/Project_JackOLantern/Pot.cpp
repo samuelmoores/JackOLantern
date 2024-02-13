@@ -143,7 +143,7 @@ void APot::Shatter()
 void APot::UnShatter()
 {
 	timeSinceShatter = GetWorld()->TimeSeconds - timeOfShatter;
-	if(timeSinceShatter > 10.0f)
+	if(timeSinceShatter > 3.0f)
 	{
 		Mesh->SetVisibility(true);
 		//BoxCollider->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
